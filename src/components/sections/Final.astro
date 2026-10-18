@@ -1,0 +1,22 @@
+---
+import Icon from "../Icon.astro";
+import { APP } from "../../data/links.mjs";
+---
+<section class="final" aria-labelledby="final-h">
+  <div class="wrap inner">
+    <h2 id="final-h">Know your revenue.<br />Keep more of it.</h2>
+    <p>Connect your first billing platform in a few minutes. Free during early access, and every connection is read-only.</p>
+    <div class="ctas">
+      <a class="btn primary" href={APP.signup}>Get started <Icon name="arrow-right" class="arrow" /></a>
+      <a class="btn secondary" href={APP.signin}>Sign in</a>
+    </div>
+  </div>
+</section>
+<style>
+  .final { padding-block: 128px 120px; }
+  .inner { display: grid; gap: 20px; justify-items: center; text-align: center; }
+  h2 { font-size: clamp(36px, 5.6vw, 64px); font-weight: 650; letter-spacing: -0.04em; line-height: 1.02; }
+  p { font-size: 18px; color: var(--ink-2); max-width: 46ch; }
+  .ctas { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 8px; }
+  @media (max-width: 560px) { .final { padding-block: 88px 80px; } }
+</style>

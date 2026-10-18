@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" width="80" height="80" role="img" aria-label="OneMRR app icon"><defs><linearGradient id="indigoGradient" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#5B4BFF"/><stop offset="100%" stop-color="#7768FF"/></linearGradient></defs><g transform="translate(0 0) scale(1.0)">
+      <rect x="0" y="0" width="80" height="80" rx="22" fill="url(#indigoGradient)"/>
+      <path d="M 18 54 L 31 41 Q 33 39 36 41 L 42 45 L 59 24" fill="none" stroke="#FFFFFF" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="59" cy="24" r="7.4" fill="#19D6B4" stroke="#6152F5" stroke-width="2.4"/>
+    </g></svg>

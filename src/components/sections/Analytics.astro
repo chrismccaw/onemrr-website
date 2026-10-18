@@ -1,0 +1,108 @@
+---
+import { bridge, previousMrr, mrr, usd } from "../../data/demo.mjs";
+
+// Horizontal MRR bridge on a $44K–$50K axis, built from a running total.
+const lo = 44000, hi = 50000;
+const pos = (v: number) => ((v - lo) / (hi - lo)) * 100;
+let run = previousMrr;
+const rows = bridge.map((b) => {
+  const from = run, to = run + b.amount;
+  run = to;
+  return { ...b, left: pos(Math.min(from, to)), width: Math.abs(pos(to) - pos(from)) };
+});
+const initials = (n: string) => n.replace(/&/g, "").split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join("").toUpperCase();
+const heading: Record<string, string> = { new: "New in October", expansion: "Expansion in October", reactivation: "Reactivated in October", contraction: "Contraction in October", churn: "Churned in October" };
+---
+<section class="band" id="analytics" aria-labelledby="analytics-h">
+  <div class="wrap">
+    <div class="head">
+      <h2 class="h2" id="analytics-h">Know exactly what's changing.</h2>
+      <p class="lede">See how much MRR came from new customers, upgrades and returns, and how much went to downgrades and cancellations. Select any movement to see the customers behind it.</p>
+    </div>
+    <div class="grid" data-bridge>
+      <div class="app panel">
+        <div>
+          <div class="title" id="bridge-t">MRR bridge</div>
+          <div class="muted">September to October. The axis starts at $44K so the change is visible.</div>
+        </div>
+        <div class="bridge" role="group" aria-labelledby="bridge-t">
+          <div class="row total"><span class="lab">September MRR</span><span class="bar"><b style={`left:0;width:${pos(previousMrr)}%;background:#4c5574`}></b></span><span class="val">{usd(previousMrr)}</span></div>
+          {rows.map((r, i) => (
+            <button type="button" class="row" data-k={r.key} aria-pressed={i === 0 ? "true" : "false"}>
+              <span class="lab"><i style={`background:var(--mv-${r.key})`}></i>{r.label} <span class="muted">{r.count}</span></span>
+              <span class="bar" aria-hidden="true"><b style={`left:${r.left}%;width:${Math.max(r.width, 0.6)}%;background:var(--mv-${r.key})`}></b></span>
+              <span class={`val ${r.amount > 0 ? "up" : ""}`}>{usd(r.amount, true)}</span>
+            </button>
+          ))}
+          <div class="row total"><span class="lab">October MRR</span><span class="bar"><b style={`left:0;width:${pos(mrr)}%;background:var(--d-accent)`}></b></span><span class="val">{usd(mrr)}</span></div>
+          <div class="row axis" aria-hidden="true"><span></span><span class="ticks"><span>$44K</span><span>$46K</span><span>$48K</span><span>$50K</span></span><span></span></div>
+        </div>
+      </div>
+      <div class="app panel movers" aria-live="polite">
+        {rows.map((r, i) => (
+          <div class="list" data-list={r.key} hidden={i !== 0}>
+            <div>
+              <div class="title">{heading[r.key]}</div>
+              <div class="muted">{r.count} customers · the {r.customers.length} largest</div>
+            </div>
+            <ul>
+              {r.customers.map((c) => (
+                <li>
+                  <span class="av">{initials(c.name)}</span>
+                  <span><span class="cn">{c.name}</span><span class="muted cm"><span class={`badge sm ${c.source}`}>{c.source === "wix" ? "W" : "S"}</span> {c.plan} · {c.date}</span></span>
+                  <span class={`amt ${c.amount > 0 ? "up" : "down"}`}>{usd(c.amount, true)}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </div>
+    <p class="also">Also in OneMRR: customer and revenue churn, net revenue retention, cohorts, CAC, LTV and payback, an experimental forecast, and CSV export.</p>
+  </div>
+</section>
+<script>
+  for (const root of document.querySelectorAll<HTMLElement>("[data-bridge]")) {
+    const buttons = root.querySelectorAll<HTMLButtonElement>("button[data-k]");
+    buttons.forEach((b) =>
+      b.addEventListener("click", () => {
+        buttons.forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+        root.querySelectorAll<HTMLElement>("[data-list]").forEach((l) => (l.hidden = l.dataset.list !== b.dataset.k));
+      }),
+    );
+  }
+</script>
+<style>
+  .grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+  .bridge { display: grid; gap: 2px; }
+  .row { all: unset; box-sizing: border-box; display: grid; grid-template-columns: 158px minmax(0, 1fr) 76px; gap: 12px; align-items: center; padding: 8px 10px; border-radius: 8px; font-size: 13px; }
+  button.row { cursor: pointer; }
+  button.row:hover { background: var(--d-hover); }
+  button.row[aria-pressed="true"] { background: var(--d-wash); }
+  button.row:focus-visible { outline: 2px solid var(--d-accent); outline-offset: -2px; }
+  .row.total { border-top: 1px solid var(--d-line); border-radius: 0; padding-top: 11px; margin-top: 2px; font-weight: 600; }
+  .row.total:first-child { border-top: 0; margin-top: 0; }
+  .lab { display: flex; align-items: center; gap: 8px; }
+  .lab i { width: 9px; height: 9px; border-radius: 2px; flex: none; }
+  .bar { position: relative; height: 16px; }
+  .bar b { position: absolute; top: 0; height: 100%; border-radius: 3px; }
+  .val { text-align: right; font-weight: 600; }
+  .axis { padding-top: 2px; padding-bottom: 0; font-size: 11px; color: var(--d-ink-3); }
+  .ticks { display: flex; justify-content: space-between; }
+  .ticks span:first-child { transform: translateX(-30%); }
+  .ticks span:last-child { transform: translateX(30%); }
+  .movers ul { list-style: none; padding: 0; display: grid; }
+  .movers li { display: grid; grid-template-columns: 28px 1fr auto; gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--d-line); }
+  .movers li:last-child { border-bottom: 0; }
+  .list { display: grid; gap: 10px; }
+  .list[hidden] { display: none; }
+  .cn { display: block; font-weight: 550; font-size: 13.5px; }
+  .cm { display: flex; align-items: center; gap: 5px; margin-top: 2px; }
+  .amt { font-weight: 600; }
+  .amt.down { color: var(--d-ink-2); }
+  .also { margin-top: 28px; font-size: 15px; color: var(--ink-3); }
+  @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+  @media (max-width: 560px) {
+    .row { grid-template-columns: 118px minmax(0, 1fr) 64px; gap: 8px; padding: 8px 6px; font-size: 12.5px; }
+  }
+</style>

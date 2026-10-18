@@ -1,0 +1,242 @@
+---
+import { bluebirdWeeks, bluebirdSignal, harborSignal, atRisk } from "../../data/demo.mjs";
+
+// Weekly key activity, drawn in HTML so it reflows on phones. Bars sit at their real values;
+// step 1 scales the last two back up to normal. Weeks 3–10 are the rule's 56-day baseline.
+const max = 40;
+const baseline = 31;
+const pct = (v: number) => `${((v / max) * 100).toFixed(2)}%`;
+const bars = bluebirdWeeks.map((v, i) => ({ fell: i >= 10, h: pct(v), k: ((i >= 10 ? baseline + (i === 10 ? -1 : 1) : v) / v).toFixed(3) }));
+
+const steps = [
+  { t: "Steady activity", c: "Bluebird Bakery publishes about 31 reports a week. That's their normal." },
+  { t: "Activity falls", c: "In the last two weeks, that fell to about 8 a week." },
+  { t: "A rule flags it", c: "The daily check compares them with their own normal level and opens one signal that explains why." },
+  { t: "It lands in At risk", c: "Bluebird Bakery joins the At risk list, sorted by priority." },
+  { t: "MRR attached", c: "The signal carries the subscription's MRR, so you know what's at stake." },
+  { t: "You choose the action", c: "Pick what happens next: a digest for you, a draft to review, or an automatic email." },
+];
+---
+<section class="band canvas" id="signals" aria-labelledby="signals-h">
+  <div class="wrap">
+    <div class="head">
+      <h2 class="h2" id="signals-h">Spot warning signs before customers leave.</h2>
+      <p class="lede">OneMRR connects product activity to subscription revenue. When a paying customer's activity drops well below their own normal level, you see who it is, why they were flagged and how much MRR they carry.</p>
+    </div>
+
+    <div class="app stage" data-signals data-step="5">
+      <div class="steps">
+        <ol aria-label="Churn Signals, step by step">
+          {steps.map((s, i) => (
+            <li><button type="button" data-go={i} aria-current={i === 5 ? "step" : undefined}><span class="n">{i + 1}</span>{s.t}</button></li>
+          ))}
+        </ol>
+        <p class="cap" data-cap>{steps[5].c}</p>
+        <button type="button" class="play" data-play aria-pressed="false" hidden>Pause</button>
+      </div>
+
+      <div class="scene">
+        <div class="cust">
+          <span class="av lg">BB</span>
+          <div><div class="title">Bluebird Bakery</div><div class="muted cm"><span class="badge sm stripe">S</span> Growth, monthly · customer since March 2025</div></div>
+          <span class="pill mrr show-4">$79 MRR</span>
+        </div>
+
+        <div class="chart">
+          <div class="label">Key activity per week · <span class="soft">report_published</span></div>
+          <div class="plot" role="img" aria-label={`Weekly key activity: about ${baseline} a week from August, falling to ${bluebirdWeeks[10]} and ${bluebirdWeeks[11]} in the last two weeks.`}>
+            <span class="normal-t" aria-hidden="true">Normal: about {baseline} a week</span>
+            <div class="area" aria-hidden="true">
+              <span class="nband" style={`bottom:${pct(baseline - 4)};height:${pct(8)}`}></span>
+              <span class="norm" style={`bottom:${pct(baseline)}`}><i>{baseline}</i></span>
+              {bars.map((b) => <span class={b.fell ? "bar fell" : "bar"} style={`height:${b.h};--k:${b.k}`}></span>)}
+            </div>
+            <div class="dates" aria-hidden="true"><span>Aug 1</span><span>Oct 17</span></div>
+          </div>
+        </div>
+
+        <div class="signal show-2">
+          <div class="sig-h"><span class="pill high">High</span><span class="title sm">Activity dropped · weekly rule</span><span class="muted when">Detected Oct 17, 04:30 UTC</span></div>
+          <p class="soft">{bluebirdSignal.sentence}</p>
+        </div>
+
+        <div class="risk show-3">
+          <table class="dtable">
+            <caption class="sr-only">At risk customers</caption>
+            <thead><tr><th>Customer</th><th class="r">MRR</th><th>Priority</th><th class="opt">Normal → recent</th><th class="opt">Last key activity</th><th>Outreach</th></tr></thead>
+            <tbody>
+              {atRisk.map((r, i) => (
+                <tr class={i === 0 ? "new" : undefined}>
+                  <td class="strong">{r.name}</td>
+                  <td class="r strong">${r.mrr}</td>
+                  <td><span class={`pill ${r.priority.toLowerCase()}`}>{r.priority}</span></td>
+                  <td class="opt">{r.normal}</td>
+                  <td class="opt">{r.last}</td>
+                  <td>{i === 0 ? <span class="outreach"><span class="o-before">—</span><span class="o-after">Draft ready</span></span> : r.outreach === "Replied" ? <span class="pill ok">Replied</span> : r.outreach}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="act show-5">
+          <span class="label">When this rule flags a customer</span>
+          <span class="seg"><span>Notify me</span><span class="on">Prepare an email</span><span>Email automatically</span></span>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="cfg">
+      <div>
+        <h3>Your product's rhythm</h3>
+        <p>Tell OneMRR whether customers use you daily, weekly, monthly, seasonally or every few days. Quiet months outside your season don't raise alarms.</p>
+      </div>
+      <div>
+        <h3>Rules you can read</h3>
+        <p>Activity fell by at least <strong>60%</strong>. Quiet for <strong>twice</strong> their usual gap. Stopped completely. Change any threshold or window; every change is saved as a new version.</p>
+      </div>
+      <div>
+        <h3>A priority, not a prediction</h3>
+        <p>Each customer is compared with their own history. Thin histories are marked "not enough data" instead of guessed, and priority only orders the list. It isn't a probability.</p>
+      </div>
+    </div>
+    <p class="note example">Another rule, on another customer: “{harborSignal.sentence}”</p>
+  </div>
+</section>
+
+<script>
+  const CAPS: string[] = [
+    "Bluebird Bakery publishes about 31 reports a week. That's their normal.",
+    "In the last two weeks, that fell to about 8 a week.",
+    "The daily check compares them with their own normal level and opens one signal that explains why.",
+    "Bluebird Bakery joins the At risk list, sorted by priority.",
+    "The signal carries the subscription's MRR, so you know what's at stake.",
+    "Pick what happens next: a digest for you, a draft to review, or an automatic email.",
+  ];
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  for (const root of document.querySelectorAll<HTMLElement>("[data-signals]")) {
+    const go = root.querySelectorAll<HTMLButtonElement>("[data-go]");
+    const cap = root.querySelector<HTMLElement>("[data-cap]")!;
+    const play = root.querySelector<HTMLButtonElement>("[data-play]")!;
+    let step = 5, timer = 0, visible = false, paused = reduce;
+    const show = (s: number) => {
+      step = s;
+      root.dataset.step = String(s);
+      go.forEach((b, i) => (i === s ? b.setAttribute("aria-current", "step") : b.removeAttribute("aria-current")));
+      cap.textContent = CAPS[s];
+      const strip = go[s].closest("ol")!;
+      if (strip.scrollWidth > strip.clientWidth) strip.scrollTo({ left: go[s].offsetLeft - 14, behavior: reduce ? "auto" : "smooth" });
+    };
+    const tick = () => show((step + 1) % CAPS.length);
+    const sync = () => {
+      clearInterval(timer);
+      if (visible && !paused) timer = window.setInterval(tick, 2800);
+      play.textContent = paused ? "Play" : "Pause";
+      play.setAttribute("aria-pressed", String(!paused));
+      cap.setAttribute("aria-live", paused ? "polite" : "off");
+    };
+    go.forEach((b) => b.addEventListener("click", () => { paused = true; show(Number(b.dataset.go)); sync(); }));
+    play.addEventListener("click", () => { paused = !paused; if (!paused && step === CAPS.length - 1) show(0); sync(); });
+    play.hidden = false;
+    // The finished frame stays up until the demo first scrolls into view; then it plays from the start.
+    let started = false;
+    new IntersectionObserver(([e]) => {
+      visible = e.isIntersecting;
+      if (visible && !started && !paused) { started = true; show(0); }
+      sync();
+    }, { threshold: 0.35 }).observe(root);
+  }
+</script>
+
+<style>
+  .stage { display: grid; grid-template-columns: 236px minmax(0, 1fr); }
+  .steps { background: var(--d-rail); border-right: 1px solid var(--d-line); padding: 18px 14px; display: grid; gap: 14px; align-content: start; }
+  .steps ol { list-style: none; padding: 0; display: grid; gap: 3px; }
+  .steps ol button {
+    all: unset; box-sizing: border-box; width: 100%; cursor: pointer; display: flex; gap: 10px; align-items: center;
+    padding: 9px 10px; border-radius: 8px; font-size: 13.5px; color: var(--d-ink-3);
+  }
+  .steps ol button:hover { color: var(--d-ink); }
+  .steps ol button:focus-visible { outline: 2px solid var(--d-accent); outline-offset: -2px; }
+  .steps .n { display: grid; place-items: center; flex: none; width: 20px; height: 20px; border-radius: 50%; border: 1px solid var(--d-line-2); font-size: 11px; font-weight: 600; }
+  .steps ol button[aria-current="step"] { background: var(--d-wash); color: var(--d-ink); }
+  .steps ol button[aria-current="step"] .n { background: var(--d-accent); border-color: var(--d-accent); color: var(--d-bg); }
+  .play { all: unset; cursor: pointer; justify-self: start; margin-left: 10px; font-size: 12px; color: var(--d-ink-2); border: 1px solid var(--d-line); border-radius: 7px; padding: 5px 11px; }
+  .play:hover { color: var(--d-ink); border-color: var(--d-line-2); }
+  .play:focus-visible { outline: 2px solid var(--d-accent); outline-offset: 2px; }
+  .play[hidden] { display: none; }
+
+  .scene { padding: 22px 24px; display: grid; gap: 16px; align-content: start; min-width: 0; }
+  .cust { display: flex; align-items: center; gap: 12px; }
+  .av.lg { width: 36px; height: 36px; font-size: 12px; }
+  .cm { display: flex; align-items: center; gap: 5px; margin-top: 2px; }
+  .mrr { margin-left: auto; font-size: 12.5px; padding: 6px 10px; }
+  .plot { margin-top: 10px; display: grid; gap: 6px; }
+  .normal-t { justify-self: end; font-size: 11.5px; color: var(--d-accent-2); }
+  .area { position: relative; height: 170px; margin-left: 24px; display: flex; align-items: flex-end; gap: 2.2%; padding: 0 0.6%; border-bottom: 1px solid var(--d-line); }
+  .nband { position: absolute; left: 0; right: 0; background: rgba(139, 128, 255, 0.09); }
+  .norm { position: absolute; left: 0; right: 0; border-top: 1px dashed var(--d-accent); z-index: 1; }
+  .norm i { position: absolute; left: -24px; top: -8px; font-style: normal; font-size: 11px; color: var(--d-ink-3); }
+  .bar { flex: 1; border-radius: 3px 3px 0 0; background: rgba(139, 128, 255, 0.8); transform-origin: 50% 100%; transition: transform 0.6s cubic-bezier(.2,.7,.2,1), background-color 0.4s; }
+  [data-step="0"] .bar { transform: scaleY(var(--k)); }
+  [data-step]:not([data-step="0"]):not([data-step="1"]) .bar.fell { background: #e5484d; }
+  .dates { display: flex; justify-content: space-between; margin-left: 24px; font-size: 11px; color: var(--d-ink-3); }
+  .signal { border: 1px solid var(--d-line-2); border-radius: 10px; background: var(--d-surface); padding: 12px 14px; display: grid; gap: 6px; }
+  .sig-h { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .title.sm { font-size: 13.5px; }
+  .when { margin-left: auto; }
+  .risk { border: 1px solid var(--d-line); border-radius: 10px; overflow: hidden; }
+  .risk tr.new td { background: #1a1f3d; }
+  .outreach .o-after { display: none; }
+  [data-step="5"] .outreach .o-before { display: none; }
+  [data-step="5"] .outreach .o-after { display: inline; color: var(--d-ink); }
+  .act { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .cap { font-size: 13px; line-height: 1.5; color: var(--d-ink-2); min-height: 6em; border-top: 1px solid var(--d-line); padding: 12px 10px 0; }
+
+  /* Each layer lights up from its step on. Before that it is a faint preview, so nothing jumps
+     and the frame never looks empty. */
+  .show-2, .show-3, .show-4, .show-5 { transition: opacity 0.45s, filter 0.45s; }
+  [data-step="0"] :is(.show-2, .show-3, .show-4, .show-5),
+  [data-step="1"] :is(.show-2, .show-3, .show-4, .show-5),
+  [data-step="2"] :is(.show-3, .show-4, .show-5),
+  [data-step="3"] :is(.show-4, .show-5),
+  [data-step="4"] .show-5 { opacity: 0.12; filter: saturate(0); }
+  @media (prefers-reduced-motion: reduce) { .bar, .show-2, .show-3, .show-4, .show-5 { transition: none; } }
+
+  .cfg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 40px; margin-top: 48px; }
+  .cfg div { display: grid; gap: 8px; align-content: start; }
+  .cfg h3 { font-size: 17px; font-weight: 650; letter-spacing: -0.015em; }
+  .cfg p { font-size: 15px; color: var(--ink-2); }
+  .cfg strong { color: var(--ink); font-weight: 600; }
+  .example { margin-top: 28px; }
+
+  @media (max-width: 900px) {
+    .stage { grid-template-columns: 1fr; }
+    .steps { border-right: 0; border-bottom: 1px solid var(--d-line); }
+    .steps ol { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .cfg { grid-template-columns: 1fr; gap: 24px; }
+  }
+  @media (max-width: 560px) {
+    .scene { padding: 18px 14px; }
+    /* Phones: one scrolling row of step chips with the caption right under it, so a tap and
+       its result stay on the same screen. Layers that haven't arrived yet take no space. */
+    .steps { padding: 12px 0 14px; gap: 10px; }
+    .steps ol { display: flex; gap: 6px; overflow-x: auto; scroll-snap-type: x proximity; padding: 0 14px; scrollbar-width: none; }
+    .steps ol::-webkit-scrollbar { display: none; }
+    .steps ol li { flex: none; scroll-snap-align: start; }
+    .steps ol button { width: auto; white-space: nowrap; font-size: 12.5px; padding: 7px 12px 7px 7px; border: 1px solid var(--d-line); border-radius: 999px; }
+    .steps ol button[aria-current="step"] { border-color: var(--d-accent); }
+    .cap { min-height: 4.5em; padding: 10px 14px 0; margin: 0; }
+    .play { margin-left: 14px; }
+    [data-step="0"] :is(.show-2, .show-3, .show-4, .show-5),
+    [data-step="1"] :is(.show-2, .show-3, .show-4, .show-5),
+    [data-step="2"] :is(.show-3, .show-4, .show-5),
+    [data-step="3"] :is(.show-4, .show-5),
+    [data-step="4"] .show-5 { display: none; }
+    .mrr.show-4 { display: inline-flex !important; opacity: 0.12; }
+    .opt { display: none; }
+    .area { height: 130px; }
+    .when { margin-left: 0; width: 100%; }
+  }
+</style>

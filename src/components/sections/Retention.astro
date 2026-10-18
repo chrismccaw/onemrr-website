@@ -1,0 +1,126 @@
+---
+import { workspace } from "../../data/demo.mjs";
+// Labels and options mirror Churn → Automations in the app (retention-automation.tsx).
+const actions = [
+  { k: "notify", label: "Notify me", status: "No email. Bluebird Bakery appears in your daily digest." },
+  { k: "draft", label: "Prepare an email", status: "Draft waiting for your review in At risk." },
+  { k: "auto", label: "Email automatically", status: "Scheduled for Tuesday, Oct 20 at 9:00 AM, if every check still passes." },
+];
+---
+<section class="band" id="retention" aria-labelledby="retention-h">
+  <div class="wrap">
+    <div class="head">
+      <h2 class="h2" id="retention-h">Turn warning signs into action.</h2>
+      <p class="lede">Follow up with customers who may need help, in your own words and your own brand. You decide which signals send email, when it goes and how many go out a day. Nothing is sent automatically until you turn it on.</p>
+    </div>
+    <div class="grid" data-retention>
+      <div class="app panel">
+        <div>
+          <div class="title">Automations</div>
+          <div class="muted">What happens when a rule flags a customer. Try it.</div>
+        </div>
+        <div class="rows">
+          <div class="row">
+            <span><span class="t" id="r1">Activity dropped</span><span class="muted">Fell 60% or more · weekly</span></span>
+            <span class="seg" role="group" aria-labelledby="r1">
+              {actions.map((a) => <button type="button" data-action={a.k} aria-pressed={a.k === "draft" ? "true" : "false"}>{a.label}</button>)}
+            </span>
+            <p class="state-inline" data-state aria-hidden="true">{actions[1].status}</p>
+          </div>
+          <div class="row">
+            <span><span class="t">Activity stopped</span><span class="muted">Quiet for 2× their usual gap</span></span>
+            <span class="seg"><span>Notify me</span><span>Prepare an email</span><span class="on">Email automatically</span></span>
+          </div>
+          <div class="row">
+            <span><span class="t">Send after</span><span class="muted">Time to come back on their own</span></span>
+            <span class="seg"><span>1 hour</span><span>1 day</span><span class="on">3 days</span><span>1 week</span></span>
+          </div>
+          <div class="row">
+            <span><span class="t">Sending hours</span><span class="muted">Emails wait for the next window</span></span>
+            <span class="soft">9:00 to 17:00 · America/Chicago</span>
+          </div>
+          <div class="row">
+            <span><span class="t">Daily limit</span><span class="muted">Automatic emails a day</span></span>
+            <span class="soft">20</span>
+          </div>
+          <div class="row">
+            <span><span class="t">Automatic emails</span><span class="muted">Customers flagged before this was turned on are never emailed</span></span>
+            <span class="pill ok">On since Oct 2</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="mail" aria-label={`Example retention email from ${workspace.name}`}>
+        <p class="state" data-state aria-live="polite">{actions[1].status}</p>
+        <div class="mail-meta">
+          <span><b>Maya from {workspace.name}</b> &lt;hello@pulsetasks.app&gt;</span>
+          <span>To: Ana at Bluebird Bakery</span>
+          <span><b>A quick check-in from {workspace.name}</b></span>
+        </div>
+        <div class="mail-card">
+          <div class="mail-brand"><span class="mail-logo">{workspace.initial}</span>{workspace.name}</div>
+          <h3>Anything we can help with?</h3>
+          <p>Hi Ana,</p>
+          <p>Just checking in to see how things are going with {workspace.name}. If there's anything you're stuck on, or something we could make better, we'd love to hear from you.</p>
+          <span class="mail-btn">Book a 15-minute call</span>
+          <p>Thanks,<br />The {workspace.name} team</p>
+        </div>
+        <p class="mail-foot">{workspace.name} · 120 Main St, Austin, TX · Unsubscribe</p>
+      </div>
+    </div>
+
+    <ul class="points checks">
+      <li>Rechecked right before sending: still paying, no cancellation started</li>
+      <li>Never sent to anyone who unsubscribed, bounced or complained</li>
+      <li>At most one email per customer every 30 days</li>
+      <li>Replies come back to OneMRR and to your own inbox</li>
+      <li>Drafts wait in At risk until you approve them</li>
+      <li>Delivery, opens, clicks, replies and outcomes are reported</li>
+    </ul>
+  </div>
+</section>
+<script>
+  const STATUS: Record<string, string> = {
+    notify: "No email. Bluebird Bakery appears in your daily digest.",
+    draft: "Draft waiting for your review in At risk.",
+    auto: "Scheduled for Tuesday, Oct 20 at 9:00 AM, if every check still passes.",
+  };
+  for (const root of document.querySelectorAll<HTMLElement>("[data-retention]")) {
+    const buttons = root.querySelectorAll<HTMLButtonElement>("[data-action]");
+    const states = root.querySelectorAll<HTMLElement>("[data-state]");
+    buttons.forEach((b) =>
+      b.addEventListener("click", () => {
+        buttons.forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+        states.forEach((st) => {
+          st.textContent = STATUS[b.dataset.action!];
+          st.dataset.kind = b.dataset.action;
+        });
+      }),
+    );
+  }
+</script>
+<style>
+  .grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); gap: 24px; align-items: start; }
+  .rows { display: grid; }
+  .row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--d-line); }
+  .row:last-child { border-bottom: 0; }
+  .t { display: block; font-weight: 600; font-size: 13.5px; }
+  .row .muted { display: block; margin-top: 1px; }
+  .state { font-size: 13px; font-weight: 600; color: var(--indigo-strong); background: var(--indigo-wash); border-radius: 8px; padding: 9px 12px; margin-bottom: 14px; }
+  .state[data-kind="notify"] { color: var(--ink-2); background: #e4e4e7; }
+  .state[data-kind="auto"] { color: var(--good); background: var(--good-wash); }
+  /* Phones: the email sits far below the controls, so the result also shows under the row. */
+  .state-inline { display: none; grid-column: 1 / -1; font-size: 12.5px; font-weight: 600; color: var(--d-accent-2); background: var(--d-wash); border-radius: 7px; padding: 8px 10px; }
+  .state-inline[data-kind="notify"] { color: var(--d-ink-2); background: var(--d-surface); }
+  .state-inline[data-kind="auto"] { color: var(--d-good); background: var(--d-good-wash); }
+  .checks { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px 32px; margin-top: 40px; }
+  @media (max-width: 1000px) {
+    .grid { grid-template-columns: 1fr; }
+    .state-inline { display: block; }
+    .checks { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 640px) {
+    .row { grid-template-columns: 1fr; gap: 8px; }
+    .checks { grid-template-columns: 1fr; }
+  }
+</style>

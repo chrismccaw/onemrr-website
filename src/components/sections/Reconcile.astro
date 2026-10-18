@@ -1,0 +1,37 @@
+---
+import { recon, usd } from "../../data/demo.mjs";
+const explained = recon.rows.reduce((a, r) => a + r.diff, 0);
+---
+<section class="band" id="reconciliation" aria-labelledby="recon-h">
+  <div class="wrap split">
+    <div class="head">
+      <h2 class="h2" id="recon-h">Numbers you can actually explain.</h2>
+      <p class="lede">Every source is checked against the platform's own billing, and each difference is sorted into a reason you could give an investor. The MRR rules are written in plain English, and anything estimated says so.</p>
+      <ul class="points">
+        <li>Annual plans count as one-twelfth a month</li>
+        <li>See MRR before or after marketplace fees</li>
+        <li>Rebuild the ledger from your sources at any time</li>
+      </ul>
+    </div>
+    <figure class="app">
+      <figcaption class="panel cap">
+        <span class="title">Reconciliation · {recon.source}</span>
+        <span class="muted">OneMRR MRR {usd(recon.onemrr)} · billed in {recon.source} over the last 30 days {usd(recon.billed)}</span>
+      </figcaption>
+      <table class="dtable">
+        <thead><tr><th>Difference</th><th class="r">Customers</th><th class="r">{recon.source} − OneMRR</th></tr></thead>
+        <tbody>
+          {recon.rows.map((r) => (
+            <tr><td>{r.diff === 0 ? <span class="dot" aria-hidden="true"></span> : null}{r.label}</td><td class="r">{r.customers}</td><td class="r">{usd(r.diff, true)}</td></tr>
+          ))}
+          <tr><td class="strong">Explained</td><td></td><td class="r strong">{usd(explained, true)}</td></tr>
+        </tbody>
+      </table>
+    </figure>
+  </div>
+</section>
+<style>
+  .cap { display: grid; gap: 4px; padding-bottom: 12px; }
+  .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--d-good); margin-right: 8px; vertical-align: 1px; }
+  .points { margin-top: 10px; }
+</style>

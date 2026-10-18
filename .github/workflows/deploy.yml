@@ -1,0 +1,47 @@
+name: deploy
+
+# Build, then upload to S3 and invalidate CloudFront. AWS access is through GitHub OIDC
+# (no stored keys); the role, bucket and distribution come from infra/website.yml and are
+# set as repository variables.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
+
+  deploy:
+    name: Deploy to onemrr.dev
+    needs: ci
+    runs-on: ubuntu-24.04
+    environment:
+      name: production
+      url: https://onemrr.dev
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: us-east-1
+      - name: Upload and invalidate
+        env:
+          SITE_BUCKET: ${{ vars.SITE_BUCKET }}
+          CLOUDFRONT_DISTRIBUTION_ID: ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}
+        run: scripts/deploy.sh
+      - name: Smoke test
+        env:
+          SITE_URL: ${{ vars.SITE_URL }}
+        run: scripts/smoke.sh "${SITE_URL:-https://onemrr.dev}"

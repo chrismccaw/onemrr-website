@@ -1,0 +1,183 @@
+---
+import Icon from "../Icon.astro";
+import { APP } from "../../data/links.mjs";
+import { workspace, sources, mrr, arr, previousMrr, mrrHistory, mrrMonths, bluebirdSignal, usd } from "../../data/demo.mjs";
+
+// MRR line, $20K–$50K on the y axis.
+const W = 520, H = 170, L = 44, R = 512, T = 14, B = 146;
+const y = (v: number) => B - ((v - 20000) / 30000) * (B - T);
+const x = (i: number) => L + (i * (R - L)) / (mrrHistory.length - 1);
+const line = mrrHistory.map((v, i) => `${i ? "L" : "M"}${x(i).toFixed(1)} ${y(v).toFixed(1)}`).join(" ");
+const area = `${line} L${R} ${B} L${L} ${B}Z`;
+const ticks = [20000, 30000, 40000, 50000];
+const delta = mrr - previousMrr;
+const pct = ((delta / previousMrr) * 100).toFixed(1);
+const total = sources.reduce((a, s) => a + s.mrr, 0);
+
+// The three connected parts, each a way into the page.
+const parts = [
+  { k: "Understand", t: "One MRR across the platforms you sell on", href: "#platforms" },
+  { k: "Detect", t: "Customers whose activity is falling, with their MRR", href: "#signals" },
+  { k: "Act", t: "Branded follow-up emails you control", href: "#retention" },
+];
+---
+<section class="hero">
+  <div class="wrap">
+    <div class="copy">
+      <h1>Know your revenue.<br />Keep more of it.</h1>
+      <p class="lede">One dashboard for MRR, ARR and churn across Stripe, the Shopify App Store and the Wix App Market. Spot customers who are drifting away, and follow up before the revenue goes with them.</p>
+      <div class="ctas">
+        <a class="btn primary" href={APP.signup}>Get started <Icon name="arrow-right" class="arrow" /></a>
+        <a class="btn secondary" href="#signals">See Churn Signals</a>
+      </div>
+      <p class="fine">Free during early access. Read-only billing connections.</p>
+    </div>
+
+    <ol class="parts" aria-label="What OneMRR does">
+      {parts.map((p) => (
+        <li><a href={p.href}><span class="k">{p.k}</span><span class="t">{p.t}</span><Icon name="arrow-down" class="go" /></a></li>
+      ))}
+    </ol>
+
+    <figure class="stage">
+      <figcaption class="sr-only">Example OneMRR dashboard for a demo company: Stripe {usd(sources[0].mrr)}, Shopify {usd(sources[1].mrr)} and Wix {usd(sources[2].mrr)} add up to {usd(mrr)} MRR. A notice says one customer's key activity fell {bluebirdSignal.dropPct}% and a follow-up email draft is ready to review.</figcaption>
+      <div class="app dash" aria-hidden="true">
+        <div class="side">
+          <div class="ws"><span class="ws-logo">{workspace.initial}</span>{workspace.name}</div>
+          <span class="nav-i on">Overview</span>
+          <span class="nav-i">Customers</span>
+          <span class="nav-i">Revenue movements</span>
+          <span class="nav-i">Churn &amp; retention</span>
+          <span class="nav-i">Insights</span>
+          <span class="side-h">Workspace</span>
+          <span class="nav-i">Connections</span>
+          <span class="nav-i">Settings</span>
+        </div>
+        <div class="main">
+          <div class="filters">
+            <span class="seg"><span>Last 12 months</span></span>
+            <span class="seg"><span class="on">All sources</span><span>Stripe</span><span>Shopify</span><span>Wix</span></span>
+          </div>
+          <div class="kpis">
+            <div><div class="label">MRR</div><div class="big">{usd(mrr)}</div><div class="up small"><Icon name="arrow-up" size={12} /> {usd(delta, true)} ({pct}%) vs September</div></div>
+            <div><div class="label">ARR</div><div class="big">{usd(arr)}</div><div class="up small"><Icon name="arrow-up" size={12} /> {usd(delta * 12, true)} ({pct}%)</div></div>
+          </div>
+          <div class="flow">
+            <div class="srcs">
+              {sources.map((s, i) => (
+                <div class="src" style={`--w:${(s.mrr / total).toFixed(3)};--i:${i}`}>
+                  <span class={`badge ${s.key}`}>{s.badge}</span>
+                  <span>{s.name}{s.estimated ? <span class="muted"> est.</span> : null}</span>
+                  <span class="amt">{usd(s.mrr)}</span>
+                  <span class="track"><b style={`background:var(--src-${s.key})`}></b></span>
+                </div>
+              ))}
+            </div>
+            <svg class="chart" viewBox={`0 0 ${W} ${H}`}>
+              {ticks.map((t) => (
+                <g>
+                  <line x1={L} x2={R} y1={y(t)} y2={y(t)} stroke="#232a47" />
+                  <text x="0" y={y(t) + 3.5} fill="#8b93ad" font-size="10.5">${t / 1000}K</text>
+                </g>
+              ))}
+              <text x={L} y={H - 4} fill="#8b93ad" font-size="10.5">{mrrMonths[0]} 2025</text>
+              <text x={R} y={H - 4} fill="#8b93ad" font-size="10.5" text-anchor="end">{mrrMonths.at(-1)} 2026</text>
+              <path d={area} fill="#8b80ff" fill-opacity="0.1" />
+              <path class="mrr-line" d={line} fill="none" stroke="#8b80ff" stroke-width="2" pathLength="1" />
+              <circle class="mrr-dot" cx={R} cy={y(mrr)} r="4.5" fill="#19d6b4" stroke="#6152f5" stroke-width="1.5" />
+            </svg>
+          </div>
+        </div>
+        <div class="notice">
+          <div class="n1"><i></i>At risk · new signal</div>
+          <div class="n2">Bluebird Bakery · $79 MRR</div>
+          <div class="n3">Key activity fell {bluebirdSignal.dropPct}% from its usual level.</div>
+          <div class="n4"><span class="pill">Draft ready</span><span class="review">Review email <Icon name="arrow-right" size={12} /></span></div>
+        </div>
+      </div>
+    </figure>
+  </div>
+</section>
+
+<style>
+  .hero { padding-top: 88px; overflow: hidden; }
+  .copy { display: grid; gap: 22px; justify-items: start; max-width: 760px; }
+  h1 { font-size: clamp(42px, 7vw, 76px); font-weight: 650; letter-spacing: -0.04em; line-height: 1.0; }
+  .lede { font-size: clamp(17px, 1.6vw, 19.5px); max-width: 54ch; }
+  .ctas { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 4px; }
+  .fine { font-size: 14px; color: var(--ink-3); margin-top: -6px; }
+
+  .parts { list-style: none; padding: 0; margin-top: 56px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--line); }
+  .parts a { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; padding: 18px 24px 4px 0; text-decoration: none; color: var(--ink); }
+  .parts li + li a { padding-left: 24px; border-left: 1px solid var(--line); }
+  .parts .k { font-size: 15px; font-weight: 650; letter-spacing: -0.01em; }
+  .parts .t { grid-column: 1; font-size: 14.5px; color: var(--ink-2); }
+  .parts :global(.go) { grid-column: 2; grid-row: 1 / span 2; align-self: center; color: var(--ink-3); transition: transform 0.2s cubic-bezier(.2,.7,.2,1), color 0.2s; }
+  .parts a:hover :global(.go), .parts a:focus-visible :global(.go) { color: var(--indigo); transform: translateY(2px); }
+  .parts a:hover .k { color: var(--indigo); }
+
+  .stage { margin-top: 44px; position: relative; }
+  .dash { display: grid; grid-template-columns: 188px minmax(0, 1fr); border-radius: 14px 14px 0 0; border-bottom: 0; position: relative; }
+  .side { background: var(--d-rail); border-right: 1px solid var(--d-line); padding: 16px 12px; display: grid; gap: 2px; align-content: start; }
+  .ws { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border: 1px solid var(--d-line); border-radius: 9px; margin-bottom: 12px; font-weight: 600; font-size: 13px; }
+  .ws-logo { width: 22px; height: 22px; border-radius: 6px; background: var(--brand); display: grid; place-items: center; font-size: 11px; color: #fff; }
+  .nav-i { padding: 6px 9px; border-radius: 7px; color: var(--d-ink-2); font-size: 13px; }
+  .nav-i.on { background: var(--d-wash); color: var(--d-accent-2); }
+  .side-h { font-size: 11.5px; color: var(--d-ink-3); padding: 14px 9px 4px; }
+  .main { padding: 22px 26px 132px; display: grid; gap: 20px; align-content: start; min-width: 0; }
+  .filters { display: flex; flex-wrap: wrap; gap: 8px; }
+  .kpis { display: flex; flex-wrap: wrap; gap: 20px 56px; }
+  .big { font-size: clamp(30px, 3.6vw, 42px); font-weight: 650; letter-spacing: -0.035em; line-height: 1.1; }
+  .small { font-size: 12.5px; }
+  .flow { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.5fr); gap: 28px; align-items: center; }
+  .srcs { display: grid; gap: 9px; }
+  .src { display: grid; grid-template-columns: auto 1fr auto; gap: 9px; align-items: center; padding: 10px 12px; border: 1px solid var(--d-line); border-radius: 9px; background: var(--d-surface); font-size: 13px; }
+  .amt { font-weight: 600; }
+  .track { grid-column: 1 / -1; height: 4px; border-radius: 2px; background: var(--d-sunken); overflow: hidden; }
+  .track b { display: block; height: 100%; border-radius: 2px; transform-origin: left; transform: scaleX(var(--w)); }
+  .chart { width: 100%; height: auto; font-family: var(--sans); }
+  .notice {
+    position: absolute; right: 24px; bottom: 24px; width: 312px; max-width: calc(100% - 48px);
+    background: var(--d-surface); border: 1px solid var(--d-line-2); border-radius: 11px; padding: 13px 14px;
+    display: grid; gap: 4px; box-shadow: 0 12px 28px -14px rgba(0, 0, 0, 0.7);
+  }
+  .n1 { display: flex; align-items: center; gap: 7px; font-size: 11.5px; color: var(--d-ink-3); }
+  .n1 i { width: 7px; height: 7px; border-radius: 50%; background: var(--d-warn); }
+  .n2 { font-weight: 600; font-size: 13.5px; }
+  .n3 { font-size: 12.5px; color: var(--d-ink-2); }
+  .n4 { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 8px; padding-top: 10px; border-top: 1px solid var(--d-line); }
+  .review { display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; font-weight: 600; color: var(--d-accent-2); }
+
+  /* One entrance on load (2.4s, ease-out): the bars fill to each source's share, the MRR line
+     draws, then the notice arrives. Everything is visible at rest; reduced motion skips it. */
+  @media (prefers-reduced-motion: no-preference) {
+    .dash .src .track b { animation: src-fill 1.1s cubic-bezier(.16,1,.3,1) calc(0.15s + var(--i) * 0.12s) both; }
+    .dash .mrr-line { stroke-dasharray: 1; animation: draw 1.4s cubic-bezier(.16,1,.3,1) 0.3s both; }
+    .dash .mrr-dot { animation: pop 0.4s cubic-bezier(.16,1,.3,1) 1.5s both; }
+    .dash .notice { animation: notice 0.7s cubic-bezier(.16,1,.3,1) 1.7s both; }
+  }
+  @keyframes src-fill { from { transform: scaleX(0); } }
+  @keyframes draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+  @keyframes pop { from { opacity: 0; transform: scale(0.4); } }
+  .mrr-dot { transform-box: fill-box; transform-origin: center; }
+  @keyframes notice { from { opacity: 0; transform: translateY(14px); filter: blur(3px); } }
+
+  @media (max-width: 900px) {
+    .dash { grid-template-columns: 1fr; }
+    .side { display: none; }
+    .flow { grid-template-columns: 1fr; }
+    .parts { grid-template-columns: 1fr; margin-top: 40px; }
+    .parts li + li a { padding-left: 0; border-left: 0; border-top: 1px solid var(--line); }
+    .parts a { padding: 14px 0; }
+  }
+  @media (max-width: 560px) {
+    .hero { padding-top: 48px; }
+    .copy { gap: 18px; }
+    .stage { margin-top: 32px; }
+    .main { padding: 18px 16px 20px; }
+    /* On phones the notice leads the frame, so Detect and Act are on the first screens. */
+    .dash { display: flex; flex-direction: column; }
+    .notice { position: static; order: -1; width: auto; max-width: none; margin: 16px 16px 0; }
+    .filters .seg:last-child span:not(.on) { display: none; }
+  }
+</style>

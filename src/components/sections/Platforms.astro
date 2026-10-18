@@ -1,0 +1,80 @@
+---
+import Icon from "../Icon.astro";
+import { sources, mrr, usd } from "../../data/demo.mjs";
+
+const list = [
+  { mark: "S", color: "#635bff", name: "Stripe", sub: "Subscriptions, invoices and refunds", tag: "Live" },
+  { mark: "S", color: "#4f8a2b", name: "Shopify App Store", sub: "App billing from the Partner API", tag: "Live" },
+  { mark: "W", color: "#111827", name: "Wix App Market", sub: "Payout exports, with estimates labelled", tag: "Live" },
+  { mark: "P", color: "#8a6d00", name: "Paddle and Lemon Squeezy", sub: "Read-only API keys", tag: "Beta" },
+  { mark: "{}", color: "#4535e6", name: "Your own billing", sub: "Send customers and subscription events to the API", tag: "API" },
+];
+// Small multiples share one scale, as in the app.
+const max = 25000;
+const spark = (h: number[]) => {
+  const pts = h.map((v, i) => `${((i / (h.length - 1)) * 200).toFixed(1)},${(70 - (v / max) * 66).toFixed(1)}`);
+  return { line: `M${pts.join(" L")}`, area: `M0,70 L${pts.join(" L")} L200,70Z` };
+};
+---
+<section class="band canvas" id="platforms" aria-labelledby="platforms-h">
+  <div class="wrap split">
+    <div class="head">
+      <h2 class="h2" id="platforms-h">Every platform. One MRR.</h2>
+      <p class="lede">Selling on the Shopify App Store, the Wix App Market and Stripe? Stripe's dashboard only sees Stripe. OneMRR puts every platform in one subscription ledger, so MRR means the same thing everywhere.</p>
+      <ul class="list">
+        {list.map((s) => (
+          <li>
+            <span class="mark" style={`background:${s.color}`} aria-hidden="true">{s.mark}</span>
+            <span><span class="n">{s.name}</span><span class="s">{s.sub}</span></span>
+            <span class={`tag ${s.tag.toLowerCase()}`}>{s.tag}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+    <figure>
+      <figcaption class="sr-only">MRR by source for a demo company: {sources.map((s) => `${s.name} ${usd(s.mrr)}`).join(", ")}, {usd(mrr)} in total.</figcaption>
+      <div class="app panel" aria-hidden="true">
+        <div>
+          <div class="title">MRR by source</div>
+          <div class="muted">Each chart uses the same scale. Select a source to filter the whole dashboard.</div>
+        </div>
+        <div class="mults">
+          {sources.map((s) => {
+            const p = spark(s.history);
+            const color = `var(--src-${s.key})`;
+            return (
+              <div class="mult">
+                <span class="label"><span class={`badge sm ${s.key}`}>{s.badge}</span> {s.name} · {Math.round((s.mrr / mrr) * 100)}%{s.estimated ? " · est." : ""}</span>
+                <span class="v">{usd(s.mrr)}</span>
+                <span class="up small"><Icon name="arrow-up" size={12} /> {usd(s.delta, true)}</span>
+                <svg viewBox="0 0 200 72" preserveAspectRatio="none">
+                  <path d={p.area} fill={color} fill-opacity={s.key === "wix" ? 0.07 : 0.14} />
+                  <path d={p.line} fill="none" stroke={color} stroke-width="1.8" vector-effect="non-scaling-stroke" stroke-dasharray={s.estimated ? "4 3" : undefined} />
+                </svg>
+              </div>
+            );
+          })}
+        </div>
+        <div class="foot muted">Before or after marketplace fees. Wix's revenue share and Shopify's fees are measured from your last 12 months.</div>
+      </div>
+    </figure>
+  </div>
+</section>
+<style>
+  .list { list-style: none; padding: 0; margin-top: 12px; border: 1px solid var(--line); border-radius: 12px; background: #fff; overflow: hidden; }
+  .list li { display: grid; grid-template-columns: 24px 1fr auto; gap: 12px; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+  .list li:last-child { border-bottom: 0; }
+  .mark { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 6px; color: #fff; font-size: 11px; font-weight: 700; }
+  .n { display: block; font-size: 15px; font-weight: 550; }
+  .s { display: block; font-size: 13px; color: var(--ink-3); }
+  .tag { font-size: 11.5px; font-weight: 600; padding: 3px 9px; border-radius: 999px; background: var(--good-wash); color: var(--good); }
+  .tag.beta { background: var(--warn-wash); color: var(--warn); }
+  .tag.api { background: var(--indigo-wash); color: var(--indigo-strong); }
+  .mults { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+  .mult { display: grid; gap: 4px; }
+  .v { font-size: 22px; font-weight: 650; letter-spacing: -0.025em; }
+  .small { font-size: 12px; }
+  .mult svg { width: 100%; height: 72px; margin-top: 8px; border-bottom: 1px solid var(--d-line); }
+  .foot { border-top: 1px solid var(--d-line); padding-top: 12px; }
+  @media (max-width: 560px) { .mults { grid-template-columns: 1fr; } }
+</style>
