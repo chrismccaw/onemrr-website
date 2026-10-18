@@ -1,0 +1,20 @@
+---
+/** The OneMRR mark and "onemrr." wordmark, from revspot/brand. */
+interface Props { size?: number }
+const { size = 26 } = Astro.props;
+---
+<span class="logo">
+  <svg width={size} height={size} viewBox="0 0 80 80" aria-hidden="true">
+    <defs><linearGradient id="logo-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#5B4BFF"/><stop offset="100%" stop-color="#7768FF"/></linearGradient></defs>
+    <rect width="80" height="80" rx="22" fill="url(#logo-g)"/>
+    <path d="M18 54 31 41Q33 39 36 41L42 45 59 24" fill="none" stroke="#fff" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="59" cy="24" r="7.4" fill="#19D6B4" stroke="#6152F5" stroke-width="2.4"/>
+  </svg>
+  <span class="word">one<b>mrr</b><i>.</i></span>
+</span>
+<style>
+  .logo { display: inline-flex; align-items: center; gap: 9px; }
+  .word { font-weight: 700; font-size: 19px; letter-spacing: -0.03em; color: var(--ink); line-height: 1; }
+  .word b { font-weight: 700; color: var(--indigo); }
+  .word i { font-style: normal; color: var(--mint); }
+</style>

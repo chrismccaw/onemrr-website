@@ -1,0 +1,63 @@
+---
+import { APP, SDK } from "../../data/links.mjs";
+---
+<section class="band canvas tight" id="how" aria-labelledby="how-h">
+  <div class="wrap">
+    <div class="head">
+      <span class="eyebrow">How it works</span>
+      <h2 class="h2" id="how-h">Connect. Monitor. Act.</h2>
+      <p class="lede">Revenue analytics needs only the first step. Churn Signals needs a few lines of server code.</p>
+    </div>
+    <ol class="how">
+      <li>
+        <h3><span class="n">1</span>Connect billing</h3>
+        <p>Add read-only keys for Stripe, Shopify Partners or Paddle, or upload Wix payout exports. History imports and your MRR appears.</p>
+        <div class="app conn" aria-hidden="true">
+          <span class="badge stripe">S</span><span><span class="t">Stripe</span><span class="muted">rk_live_••••a91 · read-only</span></span><span class="pill ok">Synced</span>
+        </div>
+      </li>
+      <li>
+        <h3><span class="n">2</span>Send key activity</h3>
+        <p>From your server, tell OneMRR which account did something that matters. Only the account ID, event name and time are kept.</p>
+        <pre class="code" aria-label="Example code"><code><span class="c">// npm install @onemrr/node</span>
+<span class="k">import</span> {"{"} OneMRR {"}"} <span class="k">from</span> <span class="s">"@onemrr/node"</span>;
+<span class="k">const</span> onemrr = <span class="k">new</span> <span class="f">OneMRR</span>({"{"} apiKey {"}"});
+
+onemrr.<span class="f">track</span>({"{"}
+  accountId: <span class="s">"merchant_123"</span>,
+  event: <span class="s">"report_published"</span>,
+{"}"});</code></pre>
+      </li>
+      <li>
+        <h3><span class="n">3</span>Choose what happens</h3>
+        <p>For each rule, pick a digest for you, a draft to review, or an automatic email with your own delay, hours and daily limit.</p>
+        <div class="app conn" aria-hidden="true">
+          <span class="seg"><span>Notify me</span><span class="on">Prepare an email</span><span>Email automatically</span></span>
+        </div>
+      </li>
+    </ol>
+    <div class="row">
+      <a class="btn primary" href={APP.signup}>Get started <span class="arrow" aria-hidden="true">→</span></a>
+      <a class="btn secondary" href={SDK}>@onemrr/node on npm</a>
+    </div>
+  </div>
+</section>
+<style>
+  .how { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; }
+  .how li { display: grid; gap: 12px; align-content: start; min-width: 0; }
+  .how h3 { display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 650; letter-spacing: -0.015em; }
+  .n { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--indigo); color: #fff; font-size: 12px; font-weight: 600; flex: none; }
+  .how p { font-size: 15px; color: var(--ink-2); }
+  .conn { display: flex; align-items: center; gap: 10px; padding: 14px; margin-top: 4px; }
+  .conn .t { display: block; font-weight: 600; }
+  .conn .pill { margin-left: auto; }
+  .conn .seg { flex-wrap: nowrap; }
+  .conn .seg > * { padding: 6px 8px; font-size: 11.5px; }
+  .code { margin: 4px 0 0; background: var(--d-bg); color: #d8dcf0; border-radius: 12px; padding: 14px 16px; font-family: var(--mono); font-size: 12.5px; line-height: 1.7; overflow-x: auto; }
+  .code .c { color: var(--d-ink-3); }
+  .code .k { color: #8fb4ff; }
+  .code .s { color: #7fe3cc; }
+  .code .f { color: var(--d-accent-2); }
+  .row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 44px; }
+  @media (max-width: 900px) { .how { grid-template-columns: 1fr; } }
+</style>

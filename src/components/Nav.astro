@@ -1,0 +1,42 @@
+---
+import Logo from "./Logo.astro";
+import { APP } from "../data/links.mjs";
+const links = [
+  { href: "/#platforms", label: "Revenue" },
+  { href: "/#signals", label: "Churn Signals" },
+  { href: "/#recovery", label: "Cancellation feedback" },
+  { href: "/#faq", label: "FAQ" },
+];
+---
+<header class="nav">
+  <div class="wrap row">
+    <a href="/" class="home" aria-label="OneMRR home"><Logo /></a>
+    <nav aria-label="Main">
+      <ul>
+        {links.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
+      </ul>
+    </nav>
+    <div class="actions">
+      <a class="signin" href={APP.signin}>Sign in</a>
+      <a class="btn primary small" href={APP.signup}>Get started</a>
+    </div>
+  </div>
+</header>
+<style>
+  .nav {
+    position: sticky; top: 0; z-index: 20;
+    padding-top: env(safe-area-inset-top, 0px);
+    background: rgba(255, 255, 255, 0.86);
+    backdrop-filter: saturate(1.6) blur(14px);
+    -webkit-backdrop-filter: saturate(1.6) blur(14px);
+    border-bottom: 1px solid var(--line);
+  }
+  .row { display: flex; align-items: center; gap: 36px; height: 64px; }
+  .home { text-decoration: none; display: inline-flex; }
+  ul { display: flex; gap: 26px; list-style: none; padding: 0; }
+  nav a, .signin { font-size: 14.5px; font-weight: 500; color: var(--ink-2); text-decoration: none; }
+  nav a:hover, .signin:hover { color: var(--ink); }
+  .actions { margin-left: auto; display: flex; align-items: center; gap: 18px; }
+  @media (max-width: 860px) { nav { display: none; } }
+  @media (max-width: 380px) { .signin { display: none; } }
+</style>

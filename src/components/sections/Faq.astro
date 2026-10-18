@@ -1,0 +1,82 @@
+---
+import { APP } from "../../data/links.mjs";
+// Every answer is checked against the app's code; see README "Claims".
+const faqs = [
+  {
+    q: "Why use OneMRR instead of Stripe's dashboard?",
+    a: "Stripe's dashboard only covers Stripe. If you also sell on the Shopify App Store or the Wix App Market, OneMRR puts it all into one MRR, shows which customers caused each change, and connects revenue to how customers actually use your product.",
+  },
+  {
+    q: "What happens when I sell on several platforms?",
+    a: "Each platform connects read-only and goes into one subscription ledger with the same rules: annual plans count as one-twelfth a month, and fees are handled the same way everywhere. View everything together or filter by source, before or after marketplace fees. Wix doesn't share live subscription data, so Wix MRR is estimated from payout exports and labelled as estimated.",
+  },
+  {
+    q: "What does OneMRR actually measure?",
+    a: "MRR and ARR; new, expansion, reactivation, contraction and churned MRR; customer churn, gross and net revenue churn and net revenue retention; ARPA and paying customers. There are also cohorts, CAC, LTV and payback, and an experimental forecast. Every number opens to the customers behind it.",
+  },
+  {
+    q: "How does OneMRR help me understand churn?",
+    a: "In three ways. Churn reports show who left and what it cost, by source and plan. Churn Signals flag paying customers whose activity drops, along with the MRR they carry. Cancellation surveys tell you why people left, grouped into reasons such as pricing, missing features or low usage.",
+  },
+  {
+    q: "Can I choose which activity counts?",
+    a: "Yes. You send the events that matter from your server with @onemrr/node or the HTTP API, then mark each one as key, engagement or ignored. Rules can watch key events, key and engagement events, or specific events by name, with the thresholds, time windows and minimum history you choose. OneMRR keeps only the account ID, event name and time.",
+  },
+  {
+    q: "Will OneMRR email my customers on its own?",
+    a: "Only if you turn it on. Each rule can notify you, prepare a draft for you to review, or email automatically. Automatic emails wait the delay you choose, go out within your sending hours and daily limit, and never go to customers flagged before you turned sending on. Each one is rechecked right before it goes: still paying, no cancellation started, not unsubscribed, and not emailed in the last 30 days.",
+  },
+  {
+    q: "Can I customize the emails and survey?",
+    a: "Yes. Set your company name, logo, brand color and sender name; write the subject and body; and choose the survey question, three to eight reasons, an optional comment box and the thank-you message. Preview it, send yourself a test, and publish when it's ready. The “Powered by OneMRR” line can be turned off.",
+  },
+  {
+    q: "Which cancellations get the follow-up email?",
+    a: "Verified Stripe cancellations with a customer email on file, after the delay you set. Shopify and Wix don't give apps their customers' email addresses, so for marketplace cancellations OneMRR gives you a survey link to send yourself.",
+  },
+  {
+    q: "Is my billing data safe?",
+    a: "Billing connections are read-only. Credentials are encrypted at rest and never shown again after you save them, and every workspace's data is kept apart by row-level security in the database.",
+  },
+];
+---
+<section class="band canvas" id="faq" aria-labelledby="faq-h">
+  <div class="wrap grid">
+    <div class="head">
+      <span class="eyebrow">FAQ</span>
+      <h2 class="h2" id="faq-h">Questions</h2>
+    </div>
+    <div class="list">
+      {faqs.map((f, i) => (
+        <details open={i === 0}>
+          <summary>{f.q}</summary>
+          <p>{f.a}</p>
+        </details>
+      ))}
+    </div>
+  </div>
+  <div class="wrap">
+    <div class="final">
+      <div>
+        <h2>Know your revenue. Keep more of it.</h2>
+        <p>Connect your first billing platform in a few minutes. Every connection is read-only.</p>
+      </div>
+      <a class="btn primary" href={APP.signup}>Get started <span class="arrow" aria-hidden="true">→</span></a>
+    </div>
+  </div>
+</section>
+<style>
+  .grid { display: grid; grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.3fr); gap: 48px; align-items: start; }
+  .list { border-top: 1px solid var(--line-2); }
+  details { border-bottom: 1px solid var(--line-2); }
+  summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; gap: 20px; padding: 18px 0; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: "+"; flex: none; font-weight: 400; font-size: 22px; line-height: 1; color: var(--ink-3); transition: transform 0.2s; }
+  details[open] summary::after { transform: rotate(45deg); }
+  summary:focus-visible { outline-offset: 4px; }
+  details p { padding-bottom: 20px; font-size: 15.5px; color: var(--ink-2); max-width: 68ch; }
+  .final { margin-top: 96px; padding: 44px; border-radius: 16px; background: var(--d-bg); color: var(--d-ink); display: flex; flex-wrap: wrap; gap: 24px; align-items: center; justify-content: space-between; }
+  .final h2 { font-size: clamp(26px, 3.4vw, 36px); font-weight: 650; letter-spacing: -0.035em; line-height: 1.1; }
+  .final p { margin-top: 8px; color: var(--d-ink-2); font-size: 16px; }
+  @media (max-width: 900px) { .grid { grid-template-columns: 1fr; gap: 8px; } .final { padding: 32px 24px; margin-top: 64px; } }
+</style>
