@@ -1,0 +1,262 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  onemrr.dev: a private S3 bucket behind CloudFront (origin access control), an ACM
+  certificate for onemrr.dev and www.onemrr.dev, a viewer-request function that redirects
+  www to the apex and serves directory index pages, security headers, Route 53 aliases,
+  and a GitHub OIDC role that deploys from chrismccaw/onemrr-website. Deploy in us-east-1
+  (CloudFront certificates must live there).
+
+Parameters:
+  DomainName:
+    Type: String
+    Default: onemrr.dev
+  HostedZoneId:
+    Type: AWS::Route53::HostedZone::Id
+    Default: Z095380146IOUF6B8N7W
+    Description: The onemrr.dev zone (created with the Route 53 domain registration; app.onemrr.dev lives there too).
+  EnableCustomDomain:
+    Type: String
+    AllowedValues: ["true", "false"]
+    Default: "true"
+    Description: >
+      "false" serves the site on its cloudfront.net address only, without the certificate or
+      DNS records.
+  GitHubOidcProviderArn:
+    Type: String
+    Default: arn:aws:iam::387748308477:oidc-provider/token.actions.githubusercontent.com
+    Description: The account's existing GitHub Actions OIDC provider (created by the OneMRR app stack).
+  GitHubRepository:
+    Type: String
+    Default: chrismccaw/onemrr-website
+  GitHubSubjectPrefix:
+    Type: String
+    Default: chrismccaw@1656770/onemrr-website@1424843053
+    Description: Immutable OIDC subject prefix (gh api repos/OWNER/REPO/actions/oidc/customization/sub)
+
+Conditions:
+  CustomDomain: !Equals [!Ref EnableCustomDomain, "true"]
+
+Resources:
+  # ---------------------------------------------------------------- content
+  SiteBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketName: !Sub "onemrr-website-${AWS::AccountId}"
+      OwnershipControls: { Rules: [{ ObjectOwnership: BucketOwnerEnforced }] }
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration: [{ ServerSideEncryptionByDefault: { SSEAlgorithm: AES256 } }]
+      VersioningConfiguration: { Status: Enabled }
+      LifecycleConfiguration:
+        Rules:
+          - Id: expire-old-versions
+            Status: Enabled
+            NoncurrentVersionExpiration: { NoncurrentDays: 30 }
+      Tags: [{ Key: app, Value: onemrr-website }]
+
+  SiteBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref SiteBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          # ListBucket lets CloudFront see a missing key as 404 (our 404 page) instead of 403.
+          - Sid: CloudFrontRead
+            Effect: Allow
+            Principal: { Service: cloudfront.amazonaws.com }
+            Action: [s3:GetObject, s3:ListBucket]
+            Resource: [!GetAtt SiteBucket.Arn, !Sub "${SiteBucket.Arn}/*"]
+            Condition:
+              StringEquals: { "AWS:SourceArn": !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${Distribution}" }
+          - Sid: TlsOnly
+            Effect: Deny
+            Principal: "*"
+            Action: s3:*
+            Resource: [!GetAtt SiteBucket.Arn, !Sub "${SiteBucket.Arn}/*"]
+            Condition: { Bool: { "aws:SecureTransport": "false" } }
+
+  OriginAccess:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name: onemrr-website
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  # ---------------------------------------------------------------- TLS
+  Certificate:
+    Type: AWS::CertificateManager::Certificate
+    Condition: CustomDomain
+    Properties:
+      DomainName: !Ref DomainName
+      SubjectAlternativeNames: [!Sub "www.${DomainName}"]
+      ValidationMethod: DNS
+      DomainValidationOptions:
+        - { DomainName: !Ref DomainName, HostedZoneId: !Ref HostedZoneId }
+        - { DomainName: !Sub "www.${DomainName}", HostedZoneId: !Ref HostedZoneId }
+      Tags: [{ Key: app, Value: onemrr-website }]
+
+  # ---------------------------------------------------------------- edge
+  EdgeFunction:
+    Type: AWS::CloudFront::Function
+    Properties:
+      Name: onemrr-website-viewer-request
+      AutoPublish: true
+      FunctionConfig:
+        Comment: Redirect www to the apex; serve index.html for directory paths.
+        Runtime: cloudfront-js-2.0
+      FunctionCode: !Sub |
+        function handler(event) {
+          var req = event.request;
+          var host = (req.headers.host && req.headers.host.value) || "";
+          if (host.indexOf("www.") === 0) {
+            var qs = Object.keys(req.querystring).map(function (k) {
+              var v = req.querystring[k];
+              return v.multiValue
+                ? v.multiValue.map(function (m) { return k + "=" + m.value; }).join("&")
+                : v.value === "" ? k : k + "=" + v.value;
+            }).join("&");
+            return {
+              statusCode: 301,
+              statusDescription: "Moved Permanently",
+              headers: { location: { value: "https://${DomainName}" + req.uri + (qs ? "?" + qs : "") } },
+            };
+          }
+          if (req.uri.endsWith("/")) req.uri += "index.html";
+          else if (req.uri.split("/").pop().indexOf(".") === -1) req.uri += "/index.html";
+          return req;
+        }
+
+  SecurityHeaders:
+    Type: AWS::CloudFront::ResponseHeadersPolicy
+    Properties:
+      ResponseHeadersPolicyConfig:
+        Name: onemrr-website-security
+        SecurityHeadersConfig:
+          StrictTransportSecurity: { AccessControlMaxAgeSec: 63072000, IncludeSubdomains: true, Preload: false, Override: true }
+          ContentTypeOptions: { Override: true }
+          FrameOptions: { FrameOption: DENY, Override: true }
+          ReferrerPolicy: { ReferrerPolicy: strict-origin-when-cross-origin, Override: true }
+          ContentSecurityPolicy:
+            Override: true
+            ContentSecurityPolicy: "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests"
+        CustomHeadersConfig:
+          Items:
+            - { Header: Permissions-Policy, Value: "camera=(), microphone=(), geolocation=(), interest-cohort=()", Override: true }
+
+  Distribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Comment: onemrr.dev marketing site
+        Enabled: true
+        HttpVersion: http2and3
+        IPV6Enabled: true
+        PriceClass: PriceClass_100
+        DefaultRootObject: index.html
+        Aliases: !If [CustomDomain, [!Ref DomainName, !Sub "www.${DomainName}"], !Ref AWS::NoValue]
+        ViewerCertificate: !If
+          - CustomDomain
+          - { AcmCertificateArn: !Ref Certificate, SslSupportMethod: sni-only, MinimumProtocolVersion: TLSv1.2_2021 }
+          - { CloudFrontDefaultCertificate: true }
+        Origins:
+          - Id: site
+            DomainName: !GetAtt SiteBucket.RegionalDomainName
+            OriginAccessControlId: !GetAtt OriginAccess.Id
+            S3OriginConfig: { OriginAccessIdentity: "" }
+        DefaultCacheBehavior:
+          TargetOriginId: site
+          ViewerProtocolPolicy: redirect-to-https
+          AllowedMethods: [GET, HEAD]
+          CachedMethods: [GET, HEAD]
+          Compress: true
+          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6 # Managed-CachingOptimized
+          ResponseHeadersPolicyId: !Ref SecurityHeaders
+          FunctionAssociations:
+            - { EventType: viewer-request, FunctionARN: !GetAtt EdgeFunction.FunctionMetadata.FunctionARN }
+        CustomErrorResponses:
+          - { ErrorCode: 403, ResponseCode: 404, ResponsePagePath: /404.html, ErrorCachingMinTTL: 60 }
+          - { ErrorCode: 404, ResponseCode: 404, ResponsePagePath: /404.html, ErrorCachingMinTTL: 60 }
+      Tags: [{ Key: app, Value: onemrr-website }]
+
+  # ---------------------------------------------------------------- DNS
+  ApexA:
+    Type: AWS::Route53::RecordSet
+    Condition: CustomDomain
+    Properties:
+      HostedZoneId: !Ref HostedZoneId
+      Name: !Ref DomainName
+      Type: A
+      AliasTarget: { DNSName: !GetAtt Distribution.DomainName, HostedZoneId: Z2FDTNDATAQYW2 }
+  ApexAAAA:
+    Type: AWS::Route53::RecordSet
+    Condition: CustomDomain
+    Properties:
+      HostedZoneId: !Ref HostedZoneId
+      Name: !Ref DomainName
+      Type: AAAA
+      AliasTarget: { DNSName: !GetAtt Distribution.DomainName, HostedZoneId: Z2FDTNDATAQYW2 }
+  WwwA:
+    Type: AWS::Route53::RecordSet
+    Condition: CustomDomain
+    Properties:
+      HostedZoneId: !Ref HostedZoneId
+      Name: !Sub "www.${DomainName}"
+      Type: A
+      AliasTarget: { DNSName: !GetAtt Distribution.DomainName, HostedZoneId: Z2FDTNDATAQYW2 }
+  WwwAAAA:
+    Type: AWS::Route53::RecordSet
+    Condition: CustomDomain
+    Properties:
+      HostedZoneId: !Ref HostedZoneId
+      Name: !Sub "www.${DomainName}"
+      Type: AAAA
+      AliasTarget: { DNSName: !GetAtt Distribution.DomainName, HostedZoneId: Z2FDTNDATAQYW2 }
+
+  # ---------------------------------------------------------------- GitHub deploys (OIDC, no stored keys)
+  DeployRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: onemrr-website-github-deploy
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: { Federated: !Ref GitHubOidcProviderArn }
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringEquals: { "token.actions.githubusercontent.com:aud": sts.amazonaws.com }
+              StringLike:
+                "token.actions.githubusercontent.com:sub":
+                  - !Sub "repo:${GitHubRepository}:environment:production"
+                  - !Sub "repo:${GitHubSubjectPrefix}:environment:production"
+      Policies:
+        - PolicyName: deploy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - { Effect: Allow, Action: s3:ListBucket, Resource: !GetAtt SiteBucket.Arn }
+              - { Effect: Allow, Action: [s3:PutObject, s3:DeleteObject], Resource: !Sub "${SiteBucket.Arn}/*" }
+              - Effect: Allow
+                Action: [cloudfront:CreateInvalidation, cloudfront:GetInvalidation]
+                Resource: !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${Distribution}"
+
+Outputs:
+  BucketName:
+    Value: !Ref SiteBucket
+  DistributionId:
+    Value: !Ref Distribution
+  DistributionDomain:
+    Value: !GetAtt Distribution.DomainName
+  DeployRoleArn:
+    Value: !GetAtt DeployRole.Arn
+  SiteUrl:
+    Value: !If [CustomDomain, !Sub "https://${DomainName}", !Sub "https://${Distribution.DomainName}"]
