@@ -16,7 +16,6 @@ const heading: Record<string, string> = { new: "New in October", expansion: "Exp
 <section class="band" id="analytics" aria-labelledby="analytics-h">
   <div class="wrap">
     <div class="head">
-      <span class="eyebrow">Revenue movements</span>
       <h2 class="h2" id="analytics-h">Know exactly what's changing.</h2>
       <p class="lede">See how much MRR came from new customers, upgrades and returns, and how much went to downgrades and cancellations. Select any movement to see the customers behind it.</p>
     </div>
@@ -44,7 +43,7 @@ const heading: Record<string, string> = { new: "New in October", expansion: "Exp
           <div class="list" data-list={r.key} hidden={i !== 0}>
             <div>
               <div class="title">{heading[r.key]}</div>
-              <div class="muted">{r.count} customers, largest first</div>
+              <div class="muted">{r.count} customers · the {r.customers.length} largest</div>
             </div>
             <ul>
               {r.customers.map((c) => (

@@ -1,4 +1,5 @@
 ---
+import Icon from "../Icon.astro";
 import { workspace, reasons, funnel } from "../../data/demo.mjs";
 const maxR = Math.max(...reasons.map((r) => r.n));
 // Survey reasons and email copy are the app's shipped defaults (revspot/src/lib/recovery/shared.ts).
@@ -8,8 +9,7 @@ const custom = ["Company name", "Logo", "Brand color", "Sender name", "Subject a
 <section class="band canvas" id="recovery" aria-labelledby="recovery-h">
   <div class="wrap">
     <div class="head">
-      <span class="eyebrow">Cancellation feedback</span>
-      <h2 class="h2" id="recovery-h">Learn why customers leave. Give them a reason to stay.</h2>
+      <h2 class="h2" id="recovery-h">Learn why customers leave, and what to fix first.</h2>
       <p class="lede">When a subscription is cancelled, OneMRR can send a short email and a one-question survey in your brand. Answers arrive grouped by reason, next to each cancellation, so you know what to fix first.</p>
     </div>
 
@@ -20,9 +20,9 @@ const custom = ["Company name", "Logo", "Brand color", "Sender name", "Subject a
           <div class="ev"><span class="muted">Stripe · Oct 14, 10:42 AM</span><span>Cedar &amp; Rye cancelled <b>Pro, monthly</b></span><span class="muted">−$99 MRR at the end of the period</span></div>
           <div class="ev">
             <span class="muted">Before sending</span>
-            <span class="ok">✓ Verified Stripe cancellation</span>
-            <span class="ok">✓ Customer email on file</span>
-            <span class="ok">✓ Hasn't unsubscribed</span>
+            <span class="ok"><Icon name="check" size={13} /> Verified Stripe cancellation</span>
+            <span class="ok"><Icon name="check" size={13} /> Customer email on file</span>
+            <span class="ok"><Icon name="check" size={13} /> Hasn't unsubscribed</span>
             <span class="soft">Sending after 1 day</span>
           </div>
         </div>

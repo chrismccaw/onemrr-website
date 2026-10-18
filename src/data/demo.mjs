@@ -6,7 +6,7 @@
  * add up and that the signal sentences match the evaluator's arithmetic.
  */
 
-export const workspace = { name: "Pulse Tasks", initial: "P", color: "#c2410c", asOf: "October 18, 2026" };
+export const workspace = { name: "Pulse Tasks", initial: "P", color: "#b04a26", asOf: "October 18, 2026" };
 
 /** Month-end MRR in dollars, Nov 2025 → Oct 2026. */
 export const mrrHistory = [33500, 34300, 35100, 36600, 37600, 39100, 41100, 42900, 44600, 46100, 46870, 48210];
@@ -117,17 +117,17 @@ export const atRisk = [
 /* --------------------------------------------------------- Cancellation feedback */
 
 export const reasons = [
-  { label: "Missing features", n: 11 },
-  { label: "Pricing", n: 8 },
-  { label: "Low usage", n: 5 },
-  { label: "Competitor", n: 3 },
+  { label: "Missing features", n: 6 },
+  { label: "Pricing", n: 5 },
+  { label: "Low usage", n: 3 },
+  { label: "Competitor", n: 2 },
 ];
 export const funnel = [
   { label: "Sent", n: 41 },
   { label: "Delivered", n: 39 },
   { label: "Opened", n: 30 },
-  { label: "Clicked", n: 29 },
-  { label: "Answered", n: 27 },
+  { label: "Clicked", n: 19 },
+  { label: "Answered", n: 16 },
 ];
 
 /* ------------------------------------------------------------- Reconciliation */

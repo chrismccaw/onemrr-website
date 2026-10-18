@@ -1,5 +1,4 @@
 ---
-import { APP } from "../../data/links.mjs";
 // Every answer is checked against the app's code; see README "Claims".
 const faqs = [
   {
@@ -43,7 +42,6 @@ const faqs = [
 <section class="band canvas" id="faq" aria-labelledby="faq-h">
   <div class="wrap grid">
     <div class="head">
-      <span class="eyebrow">FAQ</span>
       <h2 class="h2" id="faq-h">Questions</h2>
     </div>
     <div class="list">
@@ -53,15 +51,6 @@ const faqs = [
           <p>{f.a}</p>
         </details>
       ))}
-    </div>
-  </div>
-  <div class="wrap">
-    <div class="final">
-      <div>
-        <h2>Know your revenue. Keep more of it.</h2>
-        <p>Connect your first billing platform in a few minutes. Every connection is read-only.</p>
-      </div>
-      <a class="btn primary" href={APP.signup}>Get started <span class="arrow" aria-hidden="true">→</span></a>
     </div>
   </div>
 </section>
@@ -74,9 +63,6 @@ const faqs = [
   summary::after { content: "+"; flex: none; font-weight: 400; font-size: 22px; line-height: 1; color: var(--ink-3); transition: transform 0.2s; }
   details[open] summary::after { transform: rotate(45deg); }
   summary:focus-visible { outline-offset: 4px; }
-  details p { padding-bottom: 20px; font-size: 15.5px; color: var(--ink-2); max-width: 68ch; }
-  .final { margin-top: 96px; padding: 44px; border-radius: 16px; background: var(--d-bg); color: var(--d-ink); display: flex; flex-wrap: wrap; gap: 24px; align-items: center; justify-content: space-between; }
-  .final h2 { font-size: clamp(26px, 3.4vw, 36px); font-weight: 650; letter-spacing: -0.035em; line-height: 1.1; }
-  .final p { margin-top: 8px; color: var(--d-ink-2); font-size: 16px; }
-  @media (max-width: 900px) { .grid { grid-template-columns: 1fr; gap: 8px; } .final { padding: 32px 24px; margin-top: 64px; } }
+  details p { padding-bottom: 20px; font-size: 15.5px; color: var(--ink-2); max-width: 64ch; }
+  @media (max-width: 900px) { .grid { grid-template-columns: 1fr; gap: 8px; } }
 </style>

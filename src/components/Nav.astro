@@ -1,17 +1,19 @@
 ---
 import Logo from "./Logo.astro";
+import Icon from "./Icon.astro";
 import { APP } from "../data/links.mjs";
+// Revenue = Understand, Churn Signals = Detect, Follow-up = Act (retention and cancellation emails).
 const links = [
   { href: "/#platforms", label: "Revenue" },
   { href: "/#signals", label: "Churn Signals" },
-  { href: "/#recovery", label: "Cancellation feedback" },
+  { href: "/#retention", label: "Follow-up" },
   { href: "/#faq", label: "FAQ" },
 ];
 ---
-<header class="nav">
+<header class="nav" data-nav>
   <div class="wrap row">
     <a href="/" class="home" aria-label="OneMRR home"><Logo /></a>
-    <nav aria-label="Main">
+    <nav aria-label="Main" class="links">
       <ul>
         {links.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
       </ul>
@@ -19,24 +21,63 @@ const links = [
     <div class="actions">
       <a class="signin" href={APP.signin}>Sign in</a>
       <a class="btn primary small" href={APP.signup}>Get started</a>
+      <button type="button" class="menu-btn" aria-expanded="false" aria-controls="menu" data-menu-btn>
+        <span class="sr-only">Menu</span>
+        <Icon name="menu" size={20} class="i-open" />
+        <Icon name="close" size={20} class="i-close" />
+      </button>
     </div>
   </div>
+  <nav id="menu" class="menu" aria-label="Main" hidden>
+    <ul class="wrap">
+      {links.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
+      <li><a href={APP.signin}>Sign in</a></li>
+    </ul>
+  </nav>
 </header>
+<script>
+  for (const nav of document.querySelectorAll<HTMLElement>("[data-nav]")) {
+    const btn = nav.querySelector<HTMLButtonElement>("[data-menu-btn]")!;
+    const menu = nav.querySelector<HTMLElement>("#menu")!;
+    const set = (open: boolean) => {
+      btn.setAttribute("aria-expanded", String(open));
+      menu.hidden = !open;
+    };
+    btn.addEventListener("click", () => set(menu.hidden));
+    menu.addEventListener("click", (e) => { if ((e.target as Element).closest("a")) set(false); });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !menu.hidden) { set(false); btn.focus(); }
+    });
+    window.matchMedia("(min-width: 861px)").addEventListener("change", (e) => e.matches && set(false));
+  }
+</script>
 <style>
   .nav {
     position: sticky; top: 0; z-index: 20;
     padding-top: env(safe-area-inset-top, 0px);
-    background: rgba(255, 255, 255, 0.86);
+    background: rgba(255, 255, 255, 0.88);
     backdrop-filter: saturate(1.6) blur(14px);
     -webkit-backdrop-filter: saturate(1.6) blur(14px);
     border-bottom: 1px solid var(--line);
   }
   .row { display: flex; align-items: center; gap: 36px; height: 64px; }
   .home { text-decoration: none; display: inline-flex; }
-  ul { display: flex; gap: 26px; list-style: none; padding: 0; }
-  nav a, .signin { font-size: 14.5px; font-weight: 500; color: var(--ink-2); text-decoration: none; }
-  nav a:hover, .signin:hover { color: var(--ink); }
+  .links ul { display: flex; gap: 26px; list-style: none; padding: 0; }
+  .links a, .signin { font-size: 14.5px; font-weight: 500; color: var(--ink-2); text-decoration: none; }
+  .links a:hover, .signin:hover { color: var(--ink); }
   .actions { margin-left: auto; display: flex; align-items: center; gap: 18px; }
-  @media (max-width: 860px) { nav { display: none; } }
-  @media (max-width: 380px) { .signin { display: none; } }
+  .menu-btn { display: none; place-items: center; width: 40px; height: 40px; margin-right: -8px; border: 0; border-radius: 9px; background: transparent; color: var(--ink); cursor: pointer; }
+  .menu-btn:hover { background: var(--canvas); }
+  .menu-btn :global(.i-close), .menu-btn[aria-expanded="true"] :global(.i-open) { display: none; }
+  .menu-btn[aria-expanded="true"] :global(.i-close) { display: block; }
+  .menu { border-top: 1px solid var(--line); background: #fff; }
+  .menu[hidden] { display: none; }
+  .menu ul { list-style: none; display: grid; padding-block: 8px 14px; }
+  .menu a { display: block; padding: 12px 0; font-size: 17px; font-weight: 550; color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--line); }
+  .menu li:last-child a { border-bottom: 0; color: var(--ink-2); }
+  @media (max-width: 860px) {
+    .links, .signin { display: none; }
+    .menu-btn { display: grid; }
+    .actions { gap: 10px; }
+  }
 </style>

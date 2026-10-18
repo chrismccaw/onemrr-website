@@ -20,7 +20,6 @@ const steps = [
 <section class="band canvas" id="signals" aria-labelledby="signals-h">
   <div class="wrap">
     <div class="head">
-      <span class="eyebrow">Churn Signals</span>
       <h2 class="h2" id="signals-h">Spot warning signs before customers leave.</h2>
       <p class="lede">OneMRR connects product activity to subscription revenue. When a paying customer's activity drops well below their own normal level, you see who it is, why they were flagged and how much MRR they carry.</p>
     </div>
@@ -32,6 +31,7 @@ const steps = [
             <li><button type="button" data-go={i} aria-current={i === 5 ? "step" : undefined}><span class="n">{i + 1}</span>{s.t}</button></li>
           ))}
         </ol>
+        <p class="cap" data-cap>{steps[5].c}</p>
         <button type="button" class="play" data-play aria-pressed="false" hidden>Pause</button>
       </div>
 
@@ -84,7 +84,6 @@ const steps = [
           <span class="seg"><span>Notify me</span><span class="on">Prepare an email</span><span>Email automatically</span></span>
         </div>
 
-        <p class="cap" data-cap>{steps[5].c}</p>
       </div>
     </div>
 
@@ -126,6 +125,8 @@ const steps = [
       root.dataset.step = String(s);
       go.forEach((b, i) => (i === s ? b.setAttribute("aria-current", "step") : b.removeAttribute("aria-current")));
       cap.textContent = CAPS[s];
+      const strip = go[s].closest("ol")!;
+      if (strip.scrollWidth > strip.clientWidth) strip.scrollTo({ left: go[s].offsetLeft - 14, behavior: reduce ? "auto" : "smooth" });
     };
     const tick = () => show((step + 1) % CAPS.length);
     const sync = () => {
@@ -191,7 +192,7 @@ const steps = [
   [data-step="5"] .outreach .o-before { display: none; }
   [data-step="5"] .outreach .o-after { display: inline; color: var(--d-ink); }
   .act { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-  .cap { font-size: 13px; color: var(--d-ink-2); min-height: 2.9em; border-top: 1px solid var(--d-line); padding-top: 12px; }
+  .cap { font-size: 13px; line-height: 1.5; color: var(--d-ink-2); min-height: 6em; border-top: 1px solid var(--d-line); padding: 12px 10px 0; }
 
   /* Each layer lights up from its step on. Before that it is a faint preview, so nothing jumps
      and the frame never looks empty. */
@@ -218,7 +219,22 @@ const steps = [
   }
   @media (max-width: 560px) {
     .scene { padding: 18px 14px; }
-    .steps ol button { font-size: 12.5px; padding: 8px; }
+    /* Phones: one scrolling row of step chips with the caption right under it, so a tap and
+       its result stay on the same screen. Layers that haven't arrived yet take no space. */
+    .steps { padding: 12px 0 14px; gap: 10px; }
+    .steps ol { display: flex; gap: 6px; overflow-x: auto; scroll-snap-type: x proximity; padding: 0 14px; scrollbar-width: none; }
+    .steps ol::-webkit-scrollbar { display: none; }
+    .steps ol li { flex: none; scroll-snap-align: start; }
+    .steps ol button { width: auto; white-space: nowrap; font-size: 12.5px; padding: 7px 12px 7px 7px; border: 1px solid var(--d-line); border-radius: 999px; }
+    .steps ol button[aria-current="step"] { border-color: var(--d-accent); }
+    .cap { min-height: 4.5em; padding: 10px 14px 0; margin: 0; }
+    .play { margin-left: 14px; }
+    [data-step="0"] :is(.show-2, .show-3, .show-4, .show-5),
+    [data-step="1"] :is(.show-2, .show-3, .show-4, .show-5),
+    [data-step="2"] :is(.show-3, .show-4, .show-5),
+    [data-step="3"] :is(.show-4, .show-5),
+    [data-step="4"] .show-5 { display: none; }
+    .mrr.show-4 { display: inline-flex !important; opacity: 0.12; }
     .opt { display: none; }
     .area { height: 130px; }
     .when { margin-left: 0; width: 100%; }

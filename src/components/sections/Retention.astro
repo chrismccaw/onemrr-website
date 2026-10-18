@@ -10,7 +10,6 @@ const actions = [
 <section class="band" id="retention" aria-labelledby="retention-h">
   <div class="wrap">
     <div class="head">
-      <span class="eyebrow">Retention email</span>
       <h2 class="h2" id="retention-h">Turn warning signs into action.</h2>
       <p class="lede">Follow up with customers who may need help, in your own words and your own brand. You decide which signals send email, when it goes and how many go out a day. Nothing is sent automatically until you turn it on.</p>
     </div>
@@ -26,6 +25,7 @@ const actions = [
             <span class="seg" role="group" aria-labelledby="r1">
               {actions.map((a) => <button type="button" data-action={a.k} aria-pressed={a.k === "draft" ? "true" : "false"}>{a.label}</button>)}
             </span>
+            <p class="state-inline" data-state aria-hidden="true">{actions[1].status}</p>
           </div>
           <div class="row">
             <span><span class="t">Activity stopped</span><span class="muted">Quiet for 2× their usual gap</span></span>
@@ -87,12 +87,14 @@ const actions = [
   };
   for (const root of document.querySelectorAll<HTMLElement>("[data-retention]")) {
     const buttons = root.querySelectorAll<HTMLButtonElement>("[data-action]");
-    const state = root.querySelector<HTMLElement>("[data-state]")!;
+    const states = root.querySelectorAll<HTMLElement>("[data-state]");
     buttons.forEach((b) =>
       b.addEventListener("click", () => {
         buttons.forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
-        state.textContent = STATUS[b.dataset.action!];
-        state.dataset.kind = b.dataset.action;
+        states.forEach((st) => {
+          st.textContent = STATUS[b.dataset.action!];
+          st.dataset.kind = b.dataset.action;
+        });
       }),
     );
   }
@@ -107,9 +109,14 @@ const actions = [
   .state { font-size: 13px; font-weight: 600; color: var(--indigo-strong); background: var(--indigo-wash); border-radius: 8px; padding: 9px 12px; margin-bottom: 14px; }
   .state[data-kind="notify"] { color: var(--ink-2); background: #e4e4e7; }
   .state[data-kind="auto"] { color: var(--good); background: var(--good-wash); }
+  /* Phones: the email sits far below the controls, so the result also shows under the row. */
+  .state-inline { display: none; grid-column: 1 / -1; font-size: 12.5px; font-weight: 600; color: var(--d-accent-2); background: var(--d-wash); border-radius: 7px; padding: 8px 10px; }
+  .state-inline[data-kind="notify"] { color: var(--d-ink-2); background: var(--d-surface); }
+  .state-inline[data-kind="auto"] { color: var(--d-good); background: var(--d-good-wash); }
   .checks { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px 32px; margin-top: 40px; }
   @media (max-width: 1000px) {
     .grid { grid-template-columns: 1fr; }
+    .state-inline { display: block; }
     .checks { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
   @media (max-width: 640px) {

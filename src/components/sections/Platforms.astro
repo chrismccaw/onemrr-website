@@ -1,4 +1,5 @@
 ---
+import Icon from "../Icon.astro";
 import { sources, mrr, usd } from "../../data/demo.mjs";
 
 const list = [
@@ -18,7 +19,6 @@ const spark = (h: number[]) => {
 <section class="band canvas" id="platforms" aria-labelledby="platforms-h">
   <div class="wrap split">
     <div class="head">
-      <span class="eyebrow">Revenue</span>
       <h2 class="h2" id="platforms-h">Every platform. One MRR.</h2>
       <p class="lede">Selling on the Shopify App Store, the Wix App Market and Stripe? Stripe's dashboard only sees Stripe. OneMRR puts every platform in one subscription ledger, so MRR means the same thing everywhere.</p>
       <ul class="list">
@@ -46,7 +46,7 @@ const spark = (h: number[]) => {
               <div class="mult">
                 <span class="label"><span class={`badge sm ${s.key}`}>{s.badge}</span> {s.name} · {Math.round((s.mrr / mrr) * 100)}%{s.estimated ? " · est." : ""}</span>
                 <span class="v">{usd(s.mrr)}</span>
-                <span class="up small">↑ {usd(s.delta, true)}</span>
+                <span class="up small"><Icon name="arrow-up" size={12} /> {usd(s.delta, true)}</span>
                 <svg viewBox="0 0 200 72" preserveAspectRatio="none">
                   <path d={p.area} fill={color} fill-opacity={s.key === "wix" ? 0.07 : 0.14} />
                   <path d={p.line} fill="none" stroke={color} stroke-width="1.8" vector-effect="non-scaling-stroke" stroke-dasharray={s.estimated ? "4 3" : undefined} />
