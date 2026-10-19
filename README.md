@@ -30,8 +30,28 @@ Every product claim was checked against the app's code (October 2026). Keep thes
 - Paddle and Lemon Squeezy are **beta**. Wix MRR is **estimated** from payout exports.
 - Churn Signals compares each customer with their own history. It is not a prediction, and priority is not a probability. Don't say "AI" or "predict".
 - Automatic retention emails are off by default, never retroactive, and rechecked before each send.
-- Automatic cancellation emails go to **Stripe** customers only. Marketplace cancellations get a survey link.
-- No pricing, testimonials, customer counts or recovery rates until they exist.
+- Automatic cancellation follow-ups need a **confirmed cancellation and the customer's email**. Stripe provides both; Shopify needs emails added through the API's customer endpoint; Wix cancellations are inferred, so Wix uses the survey link. Activity (retention) follow-ups need a customer email from billing or from `identify`. Don't merge the two.
+- Pricing: free during early access, no card at signup, and paid plans won't be priced on MRR or ARR. Don't add plan names, prices, grandfathering or end dates without an explicit decision.
+- No testimonials, customer counts or recovery rates until they exist.
+
+## Pages
+
+| Route | Purpose |
+|---|---|
+| `/` | The story: one MRR, what's changing, Churn Signals (3 steps), follow-up, trust and pricing, founder, FAQ |
+| `/churn-signals` | Full six-step demo, detection rules, automation settings, cancellation feedback, setup and reporting |
+| `/integrations` | What each billing platform supports, honestly |
+| `/pricing` | Early access, and what's decided about pricing after it |
+| `/security` | Verified data-handling properties only |
+| `/docs` | Quickstart, connections, how the numbers work, Churn Signals and cancellation setup |
+
+`pnpm check:links` (also in CI) fails the build on any broken internal link or anchor.
+
+## Launch blockers
+
+- **Privacy Policy and Terms of Service** don't exist. Add them, then link them in the footer.
+- **No public contact or security address.** The footer and /security need one.
+- **Production outreach is allowlisted.** `ONEMRR_OUTREACH_ALLOWLIST` is set on the app, so retention and cancellation emails only reach listed addresses. The site describes automatic follow-ups; lift the allowlist (or say "coming soon") before promoting them.
 
 ## Infrastructure
 
