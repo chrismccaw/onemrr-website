@@ -1,0 +1,104 @@
+---
+import Base from "../layouts/Base.astro";
+import PageHead from "../components/PageHead.astro";
+import Icon from "../components/Icon.astro";
+import { APP } from "../data/links.mjs";
+// Verified against revspot (October 2026): connectors in src/lib/connectors, cancellation
+// confidence in src/lib/recovery/events.ts (Wix is inferred), eligibility in
+// src/lib/recovery/automation.ts (verified + customer email), customer emails via the public
+// API's customer upsert, retention email address from billing or SDK identify.
+type Cell = { t: string; tone?: "yes" | "part" | "no" };
+const cols = [
+  { k: "stripe", name: "Stripe", mark: "S", color: "#635bff" },
+  { k: "shopify", name: "Shopify App Store", mark: "S", color: "#437a26" },
+  { k: "wix", name: "Wix App Market", mark: "W", color: "#111827" },
+  { k: "paddle", name: "Paddle", mark: "P", color: "#8a6d00", beta: true },
+  { k: "lemon", name: "Lemon Squeezy", mark: "L", color: "#b8326b", beta: true },
+  { k: "api", name: "Your own billing", mark: "{}", color: "#4535e6" },
+];
+const rows: { label: string; cells: Cell[] }[] = [
+  {
+    label: "How it connects",
+    cells: [{ t: "Read-only restricted key" }, { t: "Partner API client" }, { t: "Payout export upload, plus the API" }, { t: "Read-only API key" }, { t: "API key" }, { t: "REST API with a secret key" }],
+  },
+  {
+    label: "MRR",
+    cells: [{ t: "Live", tone: "yes" }, { t: "Live", tone: "yes" }, { t: "Estimated from payouts", tone: "part" }, { t: "Live", tone: "yes" }, { t: "Live", tone: "yes" }, { t: "From the data you send", tone: "yes" }],
+  },
+  {
+    label: "Revenue after fees",
+    cells: [{ t: "No marketplace fee" }, { t: "Fees measured from your history", tone: "yes" }, { t: "Revenue share measured", tone: "yes" }, { t: "Exact, per transaction", tone: "yes" }, { t: "Uses the fee rate you set", tone: "part" }, { t: "As you report it" }],
+  },
+  {
+    label: "Cancellations",
+    cells: [{ t: "Confirmed", tone: "yes" }, { t: "Confirmed", tone: "yes" }, { t: "Estimated", tone: "part" }, { t: "Confirmed", tone: "yes" }, { t: "Confirmed", tone: "yes" }, { t: "From the events you send", tone: "yes" }],
+  },
+  {
+    label: "Customer email",
+    cells: [{ t: "Included", tone: "yes" }, { t: "Add through the API", tone: "part" }, { t: "Add through the API", tone: "part" }, { t: "Included", tone: "yes" }, { t: "Included", tone: "yes" }, { t: "If you send it", tone: "part" }],
+  },
+  {
+    label: "Automatic cancellation follow-up",
+    cells: [{ t: "Yes", tone: "yes" }, { t: "Once emails are added", tone: "part" }, { t: "Share the survey link", tone: "no" }, { t: "Yes", tone: "yes" }, { t: "Yes", tone: "yes" }, { t: "With confirmed cancellations and emails", tone: "part" }],
+  },
+];
+---
+<Base title="Integrations · OneMRR" description="Connect Stripe, the Shopify App Store, the Wix App Market, Paddle, Lemon Squeezy or your own billing. See exactly what OneMRR can do with each." path="/integrations">
+  <PageHead title="Integrations" lede="Connect the platforms you bill through, as many as you use. Each one shares different data, so here's exactly what OneMRR can do with each.">
+    <a class="btn primary" href={APP.signup}>Get started <Icon name="arrow-right" class="arrow" /></a>
+    <a class="btn secondary" href="/docs#connect">Connection guide</a>
+  </PageHead>
+
+  <section class="band tight" aria-labelledby="matrix-h">
+    <div class="wrap">
+      <h2 class="sr-only" id="matrix-h">What each platform supports</h2>
+      <div class="scroll" tabindex="0" role="region" aria-label="Platform comparison, scrolls sideways on small screens">
+        <table class="matrix">
+          <thead>
+            <tr>
+              <th scope="col"><span class="sr-only">Capability</span></th>
+              {cols.map((c) => (
+                <th scope="col">
+                  <span class="colhead"><span class="mark" style={`background:${c.color}`} aria-hidden="true">{c.mark}</span>{c.name}</span>
+                  {c.beta ? <span class="beta">Beta</span> : null}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r) => (
+              <tr>
+                <th scope="row">{r.label}</th>
+                {r.cells.map((c) => <td class={c.tone ?? ""}>{c.t}</td>)}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div class="notes">
+        <p><strong>Churn Signals work with every platform.</strong> Your server tells OneMRR which of your accounts belongs to which billing customer, and activity follow-ups go out once OneMRR knows that customer's email, from billing or from your app.</p>
+        <p><strong>Beta</strong> means the connector is built but hasn't yet been verified against a live account.</p>
+        <p><strong>Estimated</strong> means the platform doesn't share live subscription state. Wix MRR is worked out from payout exports, and the app labels it everywhere it appears.</p>
+      </div>
+    </div>
+  </section>
+</Base>
+<style>
+  .scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 14px; }
+  .scroll:focus-visible { outline-offset: 3px; }
+  .matrix { width: 100%; min-width: 920px; border-collapse: collapse; font-size: 14px; }
+  .matrix th, .matrix td { text-align: left; vertical-align: top; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+  .matrix tbody tr:last-child th, .matrix tbody tr:last-child td { border-bottom: 0; }
+  .matrix thead th { background: var(--canvas); font-weight: 600; font-size: 13.5px; }
+  .matrix tbody th { font-weight: 600; color: var(--ink); width: 15%; }
+  .matrix td { color: var(--ink-2); }
+  .colhead { display: flex; align-items: center; gap: 8px; }
+  .mark { display: grid; place-items: center; flex: none; width: 22px; height: 22px; border-radius: 50%; color: #fff; font-size: 10.5px; font-weight: 700; }
+  .beta { display: inline-block; margin: 6px 0 0 30px; font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 999px; background: var(--warn-wash); color: var(--warn); }
+  td.yes::before, td.part::before, td.no::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 8px; vertical-align: 1px; }
+  td.yes::before { background: var(--good); }
+  td.part::before { background: #e09b00; }
+  td.no::before { background: var(--line-2); }
+  .notes { display: grid; gap: 12px; margin-top: 28px; max-width: 72ch; font-size: 15.5px; color: var(--ink-2); }
+  .notes strong { color: var(--ink); font-weight: 600; }
+</style>

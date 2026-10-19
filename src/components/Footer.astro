@@ -1,6 +1,8 @@
 ---
 import Logo from "./Logo.astro";
 import { APP, SDK } from "../data/links.mjs";
+// Privacy Policy, Terms of Service and a contact address don't exist yet; they're launch
+// blockers (see README) and get links here once approved.
 ---
 <footer class="foot">
   <div class="wrap grid">
@@ -12,23 +14,24 @@ import { APP, SDK } from "../data/links.mjs";
       <h2>Product</h2>
       <ul>
         <li><a href="/#platforms">Revenue analytics</a></li>
-        <li><a href="/#signals">Churn Signals</a></li>
-        <li><a href="/#retention">Retention email</a></li>
-        <li><a href="/#recovery">Cancellation feedback</a></li>
+        <li><a href="/churn-signals">Churn Signals</a></li>
+        <li><a href="/integrations">Integrations</a></li>
+        <li><a href="/pricing">Pricing</a></li>
       </ul>
     </nav>
     <nav aria-label="Developers">
       <h2>Developers</h2>
       <ul>
-        <li><a href={SDK}>@onemrr/node on npm</a></li>
-        <li><a href={APP.openapi}>API (OpenAPI)</a></li>
-        <li><a href="/#how">How it works</a></li>
+        <li><a href="/docs">Docs</a></li>
+        <li><a href={SDK}>@onemrr/node</a></li>
+        <li><a href={APP.openapi}>API specification</a></li>
       </ul>
     </nav>
-    <nav aria-label="Account">
-      <h2>Account</h2>
+    <nav aria-label="Company">
+      <h2>Company</h2>
       <ul>
-        <li><a href={APP.signup}>Get started</a></li>
+        <li><a href="/security">Security</a></li>
+        <li><a href="/#story">Our story</a></li>
         <li><a href={APP.signin}>Sign in</a></li>
       </ul>
     </nav>
@@ -42,9 +45,9 @@ import { APP, SDK } from "../data/links.mjs";
   .foot { border-top: 1px solid var(--line); padding-top: 56px; padding-bottom: calc(28px + env(safe-area-inset-bottom, 0px)); font-size: 14px; }
   .grid { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr; gap: 32px; }
   .brand { display: grid; gap: 12px; align-content: start; color: var(--ink-3); }
-  h2 { font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 12px; }
-  ul { list-style: none; padding: 0; display: grid; gap: 9px; }
-  a { color: var(--ink-2); text-decoration: none; }
+  h2 { font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 8px; }
+  ul { list-style: none; padding: 0; display: grid; gap: 2px; }
+  a { display: inline-block; padding-block: 6px; color: var(--ink-2); text-decoration: none; }
   a:hover { color: var(--ink); }
   .base { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 24px; margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--ink-3); font-size: 13px; }
   @media (max-width: 760px) { .grid { grid-template-columns: 1fr 1fr; } .brand { grid-column: 1 / -1; } }

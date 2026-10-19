@@ -2,40 +2,28 @@
 // Every answer is checked against the app's code; see README "Claims".
 const faqs = [
   {
-    q: "Why use OneMRR instead of Stripe's dashboard?",
-    a: "Stripe's dashboard only covers Stripe. If you also sell on the Shopify App Store or the Wix App Market, OneMRR puts it all into one MRR, shows which customers caused each change, and connects revenue to how customers actually use your product.",
+    q: "Why not just use Stripe's dashboard?",
+    a: "Stripe only sees Stripe. If you also sell through the Shopify App Store or the Wix App Market, OneMRR puts it all into one MRR, shows which customers caused each change, and connects revenue to how customers use your product.",
   },
   {
-    q: "What happens when I sell on several platforms?",
-    a: "Each platform connects read-only and goes into one subscription ledger with the same rules: annual plans count as one-twelfth a month, and fees are handled the same way everywhere. View everything together or filter by source, before or after marketplace fees. Wix doesn't share live subscription data, so Wix MRR is estimated from payout exports and labelled as estimated.",
+    q: "Is OneMRR free?",
+    a: "Yes, during early access, and you don't need a card to sign up. Paid plans aren't final yet. When they arrive, they won't be priced on your MRR or ARR.",
   },
   {
-    q: "What does OneMRR actually measure?",
-    a: "MRR and ARR; new, expansion, reactivation, contraction and churned MRR; customer churn, gross and net revenue churn and net revenue retention; ARPA and paying customers. There are also cohorts, CAC, LTV and payback, and an experimental forecast. Every number opens to the customers behind it.",
-  },
-  {
-    q: "How does OneMRR help me understand churn?",
-    a: "In three ways. Churn reports show who left and what it cost, by source and plan. Churn Signals flag paying customers whose activity drops, along with the MRR they carry. Cancellation surveys tell you why people left, grouped into reasons such as pricing, missing features or low usage.",
-  },
-  {
-    q: "Can I choose which activity counts?",
-    a: "Yes. You send the events that matter from your server with @onemrr/node or the HTTP API, then mark each one as key, engagement or ignored. Rules can watch key events, key and engagement events, or specific events by name, with the thresholds, time windows and minimum history you choose. OneMRR keeps only the account ID, event name and time.",
+    q: "How does OneMRR help with churn?",
+    a: "Churn reports show who left and what it cost. Churn Signals flag paying customers whose activity drops, with the MRR at stake. Cancellation surveys tell you why people left.",
   },
   {
     q: "Will OneMRR email my customers on its own?",
-    a: "Only if you turn it on. Each rule can notify you, prepare a draft for you to review, or email automatically. Automatic emails wait the delay you choose, go out within your sending hours and daily limit, and never go to customers flagged before you turned sending on. Each one is rechecked right before it goes: still paying, no cancellation started, not unsubscribed, and not emailed in the last 30 days.",
+    a: "Only if you turn it on, and only for the rules you choose. Every email is checked right before it goes out: the customer still pays, hasn't started cancelling, hasn't unsubscribed and wasn't emailed in the last 30 days.",
   },
   {
-    q: "Can I customize the emails and survey?",
-    a: "Yes. Set your company name, logo, brand color and sender name; write the subject and body; and choose the survey question, three to eight reasons, an optional comment box and the thank-you message. Preview it, send yourself a test, and publish when it's ready. The “Powered by OneMRR” line can be turned off.",
-  },
-  {
-    q: "Which cancellations get the follow-up email?",
-    a: "Verified Stripe cancellations with a customer email on file, after the delay you set. Shopify and Wix don't give apps their customers' email addresses, so for marketplace cancellations OneMRR gives you a survey link to send yourself.",
+    q: "Does it work the same on Stripe, Shopify and Wix?",
+    a: "Revenue works across all three, but the platforms share different data. Automatic cancellation follow-ups need a confirmed cancellation and the customer's email. Stripe provides both. Shopify doesn't share emails, so you add them through the API. Wix cancellations are estimated from payouts, so you share a branded survey link instead.",
   },
   {
     q: "Is my billing data safe?",
-    a: "Billing connections are read-only. Credentials are encrypted at rest and never shown again after you save them, and every workspace's data is kept apart by row-level security in the database.",
+    a: "OneMRR only reads from your billing platforms. Credentials are encrypted and never shown again, and each workspace's data is kept separate in the database.",
   },
 ];
 ---
@@ -43,6 +31,7 @@ const faqs = [
   <div class="wrap grid">
     <div class="head">
       <h2 class="h2" id="faq-h">Questions</h2>
+      <p class="lede small">Setup and API details are in the <a href="/docs">docs</a>.</p>
     </div>
     <div class="list">
       {faqs.map((f, i) => (
@@ -63,6 +52,8 @@ const faqs = [
   summary::after { content: "+"; flex: none; font-weight: 400; font-size: 22px; line-height: 1; color: var(--ink-3); transition: transform 0.2s; }
   details[open] summary::after { transform: rotate(45deg); }
   summary:focus-visible { outline-offset: 4px; }
+  .small { font-size: 16px; }
+  .small a { font-weight: 600; }
   details p { padding-bottom: 20px; font-size: 15.5px; color: var(--ink-2); max-width: 64ch; }
   @media (max-width: 900px) { .grid { grid-template-columns: 1fr; gap: 8px; } }
 </style>

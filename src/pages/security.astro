@@ -1,0 +1,41 @@
+---
+import Base from "../layouts/Base.astro";
+import PageHead from "../components/PageHead.astro";
+// Every statement here is checked against chrismccaw/OneMRR (October 2026):
+// connectors validate with a read-only call (Stripe restricted keys with Read access);
+// credentials use AES-256-GCM (src/lib/crypto.ts) and are never returned; the app connects
+// as onemrr_app under Postgres row-level security (infra/onemrr.yml, drizzle/0001_rls.sql);
+// tracking keeps account ID, event name and time only; outreach is off by default with the
+// eligibility checks in src/lib/retention and src/lib/recovery. Hosting: AWS us-west-2.
+// Do not add certifications, encryption-at-rest or audit claims without confirming them.
+---
+<Base title="Security and data handling · OneMRR" description="How OneMRR handles your billing data, credentials and customer emails: read-only connections, encrypted credentials, isolated workspaces and outreach you control." path="/security">
+  <PageHead title="Security and data handling" lede="You're trusting OneMRR with billing data and, if you choose, with emailing your customers. Here's exactly how that's handled." />
+
+  <section class="band tight">
+    <div class="wrap prose">
+      <h2>Billing connections are read-only</h2>
+      <p>OneMRR reads subscriptions, invoices and customers. It never changes anything in your billing platforms. For Stripe you create a <strong>restricted key with read access only</strong>, and every set of credentials is checked with a read-only call before it's saved.</p>
+
+      <h2>Credentials are encrypted</h2>
+      <p>API keys and tokens are encrypted with <strong>AES-256-GCM</strong> before they're stored. Once saved, they're never shown again, in the app or through its API.</p>
+
+      <h2>Every workspace is kept apart</h2>
+      <p>Each workspace's data carries its workspace ID, and the application connects to the database as a restricted role that <strong>Postgres row-level security</strong> limits to the workspace in use. Members have owner, admin or member roles.</p>
+
+      <h2>Activity tracking collects the minimum</h2>
+      <p>For Churn Signals, OneMRR keeps only <strong>your account ID, the event name and its time</strong>. No event properties, page URLs, IP addresses or user details. Secret keys are refused if they're sent from a browser, and keys can be limited to tracking only.</p>
+
+      <h2>Your customers are only emailed when you decide</h2>
+      <ul>
+        <li>Automatic emails are off until an owner or admin turns them on, and customers flagged or cancelled before that are never emailed.</li>
+        <li>Right before a retention email, OneMRR checks again that the customer still pays, hasn't started cancelling, and wasn't emailed in the last 30 days. Cancellation emails only go for confirmed cancellations that haven't been reversed.</li>
+        <li>Emails carry one-click unsubscribe, and unsubscribes, bounces and spam complaints stop future emails to that address.</li>
+        <li>Test emails only go to members of your workspace.</li>
+      </ul>
+
+      <h2>Where it runs</h2>
+      <p>The managed service runs on AWS in the United States (us-west-2). The Postgres database sits in private subnets with no route to the internet. Sign-in is by email and password or Google.</p>
+    </div>
+  </section>
+</Base>

@@ -1,0 +1,20 @@
+---
+/** The opening of an inner page: title, one-line summary and optional actions. */
+interface Props { title: string; lede: string }
+const { title, lede } = Astro.props;
+---
+<header class="page-head">
+  <div class="wrap">
+    <h1>{title}</h1>
+    <p class="lede">{lede}</p>
+    {Astro.slots.has("default") ? <div class="actions"><slot /></div> : null}
+  </div>
+</header>
+<style>
+  .page-head { padding-block: 88px 64px; border-bottom: 1px solid var(--line); }
+  .wrap { display: grid; gap: 18px; justify-items: start; }
+  h1 { font-size: clamp(38px, 5.6vw, 60px); font-weight: 650; letter-spacing: -0.04em; line-height: 1.04; max-width: 18ch; }
+  .lede { max-width: 56ch; }
+  .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 6px; }
+  @media (max-width: 560px) { .page-head { padding-block: 56px 44px; } }
+</style>

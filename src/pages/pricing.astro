@@ -1,0 +1,113 @@
+---
+import Base from "../layouts/Base.astro";
+import PageHead from "../components/PageHead.astro";
+import Icon from "../components/Icon.astro";
+import { APP } from "../data/links.mjs";
+// Pricing isn't decided yet. This page states only what is: free early access, no card at
+// signup (the signup form has no payment fields), and pricing that won't be based on MRR/ARR.
+// Don't add plan names, prices, grandfathering or end dates without an explicit decision.
+const included = [
+  "Revenue analytics across Stripe, Shopify, Wix and more",
+  "Churn Signals and the At risk list",
+  "Branded retention emails and replies",
+  "Cancellation surveys and feedback reports",
+  "Your whole team, with owner, admin and member roles",
+];
+const faqs = [
+  {
+    q: "Do I need a card to sign up?",
+    a: "No. Signing up asks for an email and password, or a Google account. There are no payment details to enter.",
+  },
+  {
+    q: "Will I be charged automatically when early access ends?",
+    a: "No. OneMRR has no payment method on file for you, so nothing can be charged unless you choose a paid plan and add one.",
+  },
+  {
+    q: "Why not price by MRR, like other analytics tools?",
+    a: "Because your analytics shouldn't get more expensive just because your business is doing well. What it costs us to run OneMRR depends on what it processes and sends, not on how much you earn.",
+  },
+  {
+    q: "What could limits apply to?",
+    a: "Things that cost money to run: the number of connected billing sources, tracked activity events, and emails sent. The details aren't final yet.",
+  },
+];
+---
+<Base title="Pricing · OneMRR" description="OneMRR is free during early access, with no card required. When paid plans arrive, they won't be priced on your MRR or ARR." path="/pricing">
+  <PageHead title="Your MRR grows. Your bill doesn't." lede="OneMRR is free during early access. Here's what we can tell you about pricing after that.">
+    <a class="btn primary" href={APP.signup}>Get started <Icon name="arrow-right" class="arrow" /></a>
+  </PageHead>
+
+  <section class="band tight">
+    <div class="wrap grid">
+      <div class="now">
+        <h2>Today</h2>
+        <p class="price">Free <span>during early access</span></p>
+        <p class="muted">Every feature, no card required.</p>
+        <ul class="points">
+          {included.map((i) => <li>{i}</li>)}
+        </ul>
+        <a class="btn primary" href={APP.signup}>Get started <Icon name="arrow-right" class="arrow" /></a>
+      </div>
+      <div class="later">
+        <h2>After early access</h2>
+        <p>Paid plans are still being finalized. When they're ready, they'll be published on this page. Here's what is already decided:</p>
+        <dl>
+          <div>
+            <dt>Not based on your revenue</dt>
+            <dd>Plans won't be priced on your MRR or ARR. Growing your business won't move you to a more expensive plan.</dd>
+          </div>
+          <div>
+            <dt>Limits where there's a real cost</dt>
+            <dd>Reasonable limits may apply to connected billing sources, tracked activity events and emails sent.</dd>
+          </div>
+          <div>
+            <dt>Nothing charged by surprise</dt>
+            <dd>There's no payment method on file during early access, so you'll choose a plan yourself if and when you want one.</dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <section class="band canvas tight" aria-labelledby="pq-h">
+    <div class="wrap faq">
+      <h2 class="h2" id="pq-h">Pricing questions</h2>
+      <div class="list">
+        {faqs.map((f, i) => (
+          <details open={i === 0}>
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </div>
+  </section>
+</Base>
+<style>
+  .grid { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: 64px; align-items: start; }
+  h2 { font-size: 15px; font-weight: 600; color: var(--ink-3); letter-spacing: 0; }
+  .now { display: grid; gap: 14px; justify-items: start; padding: 32px; border: 1px solid var(--line-2); border-radius: 16px; }
+  .price { font-size: 52px; font-weight: 650; letter-spacing: -0.04em; line-height: 1; color: var(--ink); }
+  .price span { font-size: 17px; font-weight: 500; letter-spacing: -0.01em; color: var(--ink-2); }
+  .muted { color: var(--ink-3); font-size: 15px; margin-top: -6px; }
+  .now .points { margin-block: 8px 10px; }
+  .later { display: grid; gap: 18px; padding-top: 32px; }
+  .later > p { font-size: 17px; color: var(--ink-2); max-width: 52ch; }
+  dl { display: grid; gap: 0; margin: 0; }
+  dl div { padding: 18px 0; border-top: 1px solid var(--line); }
+  dt { font-size: 17px; font-weight: 650; letter-spacing: -0.015em; color: var(--ink); }
+  dd { margin: 4px 0 0; font-size: 15.5px; color: var(--ink-2); max-width: 52ch; }
+  .faq { display: grid; grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.3fr); gap: 48px; align-items: start; }
+  .list { border-top: 1px solid var(--line-2); }
+  details { border-bottom: 1px solid var(--line-2); }
+  summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; gap: 20px; padding: 18px 0; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: "+"; flex: none; font-weight: 400; font-size: 22px; line-height: 1; color: var(--ink-3); transition: transform 0.2s; }
+  details[open] summary::after { transform: rotate(45deg); }
+  details p { padding-bottom: 20px; font-size: 15.5px; color: var(--ink-2); max-width: 64ch; }
+  @media (max-width: 900px) {
+    .grid, .faq { grid-template-columns: 1fr; gap: 32px; }
+    .later { padding-top: 0; }
+    .now { padding: 24px; }
+  }
+</style>

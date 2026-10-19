@@ -1,5 +1,14 @@
 ---
+import Icon from "../Icon.astro";
 import { bluebirdWeeks, bluebirdSignal, harborSignal, atRisk } from "../../data/demo.mjs";
+
+/**
+ * The Churn Signals demo. "simple" (homepage) tells it in three beats: activity drops, OneMRR
+ * flags it, you act. "full" (/churn-signals) walks all six states, with the At risk list.
+ * Both drive the same scene; data-step is always the full state number (0–5).
+ */
+interface Props { variant?: "simple" | "full"; head?: boolean }
+const { variant = "simple", head = true } = Astro.props;
 
 // Weekly key activity, drawn in HTML so it reflows on phones. Bars sit at their real values;
 // step 1 scales the last two back up to normal. Weeks 3–10 are the rule's 56-day baseline.
@@ -8,30 +17,50 @@ const baseline = 31;
 const pct = (v: number) => `${((v / max) * 100).toFixed(2)}%`;
 const bars = bluebirdWeeks.map((v, i) => ({ fell: i >= 10, h: pct(v), k: ((i >= 10 ? baseline + (i === 10 ? -1 : 1) : v) / v).toFixed(3) }));
 
-const steps = [
-  { t: "Steady activity", c: "Bluebird Bakery publishes about 31 reports a week. That's their normal." },
-  { t: "Activity falls", c: "In the last two weeks, that fell to about 8 a week." },
-  { t: "A rule flags it", c: "The daily check compares them with their own normal level and opens one signal that explains why." },
-  { t: "It lands in At risk", c: "Bluebird Bakery joins the At risk list, sorted by priority." },
-  { t: "MRR attached", c: "The signal carries the subscription's MRR, so you know what's at stake." },
-  { t: "You choose the action", c: "Pick what happens next: a digest for you, a draft to review, or an automatic email." },
-];
+const full = variant === "full";
+const caps = full
+  ? [
+      "Bluebird Bakery publishes about 31 reports a week. That's their normal.",
+      "In the last two weeks, that fell to about 8 a week.",
+      "The daily check compares them with their own normal level and opens one signal that explains why.",
+      "Bluebird Bakery joins the At risk list, sorted by priority.",
+      "The signal carries the subscription's MRR, so you know what's at stake.",
+      "Pick what happens next: a heads-up for you, a draft to review, or an automatic email.",
+    ]
+  : [
+      "Bluebird Bakery usually publishes about 31 reports a week.",
+      "Then their activity drops to about 8 a week.",
+      "",
+      "",
+      "OneMRR flags it, explains why, and shows the $79 MRR at stake.",
+      "You decide what happens: a heads-up, a draft to review, or an automatic email.",
+    ];
+const steps = full
+  ? ["Steady activity", "Activity falls", "A rule flags it", "It lands in At risk", "MRR attached", "You choose the action"].map((t, i) => ({ t, states: [i] }))
+  : [
+      { t: "Activity drops", states: [0, 1] },
+      { t: "OneMRR flags it", states: [4] },
+      { t: "You take action", states: [5] },
+    ];
+const seq = steps.flatMap((s) => s.states);
 ---
-<section class="band canvas" id="signals" aria-labelledby="signals-h">
+<section class:list={["band", "canvas", `v-${variant}`]} id="signals" aria-labelledby="signals-h">
   <div class="wrap">
-    <div class="head">
-      <h2 class="h2" id="signals-h">Spot warning signs before customers leave.</h2>
-      <p class="lede">OneMRR connects product activity to subscription revenue. When a paying customer's activity drops well below their own normal level, you see who it is, why they were flagged and how much MRR they carry.</p>
-    </div>
+    {head ? (
+      <div class="head">
+        <h2 class="h2" id="signals-h">Spot warning signs before customers leave.</h2>
+        <p class="lede">OneMRR links product activity to the subscriptions behind it. When a paying customer's usage drops well below their own normal, you see who, why, and how much MRR is at stake.</p>
+      </div>
+    ) : <h2 class="sr-only" id="signals-h">Churn Signals, step by step</h2>}
 
-    <div class="app stage" data-signals data-step="5">
+    <div class="app stage" data-signals data-step="5" data-caps={JSON.stringify(caps)} data-seq={JSON.stringify(seq)}>
       <div class="steps">
         <ol aria-label="Churn Signals, step by step">
           {steps.map((s, i) => (
-            <li><button type="button" data-go={i} aria-current={i === 5 ? "step" : undefined}><span class="n">{i + 1}</span>{s.t}</button></li>
+            <li><button type="button" data-states={s.states.join(",")} aria-current={i === steps.length - 1 ? "step" : undefined}><span class="n">{i + 1}</span>{s.t}</button></li>
           ))}
         </ol>
-        <p class="cap" data-cap>{steps[5].c}</p>
+        <p class="cap" data-cap>{caps[5]}</p>
         <button type="button" class="play" data-play aria-pressed="false" hidden>Pause</button>
       </div>
 
@@ -87,6 +116,7 @@ const steps = [
       </div>
     </div>
 
+    {full ? (
     <div class="cfg">
       <div>
         <h3>Your product's rhythm</h3>
@@ -101,34 +131,33 @@ const steps = [
         <p>Each customer is compared with their own history. Thin histories are marked "not enough data" instead of guessed, and priority only orders the list. It isn't a probability.</p>
       </div>
     </div>
-    <p class="note example">Another rule, on another customer: “{harborSignal.sentence}”</p>
+    ) : (
+      <p class="aside">Each customer is compared with their own normal activity, so a priority is never a churn probability. <a href="/churn-signals">How Churn Signals work <Icon name="arrow-right" size={14} /></a></p>
+    )}
+    {full ? <p class="note example">Another rule, on another customer: “{harborSignal.sentence}”</p> : null}
   </div>
 </section>
 
 <script>
-  const CAPS: string[] = [
-    "Bluebird Bakery publishes about 31 reports a week. That's their normal.",
-    "In the last two weeks, that fell to about 8 a week.",
-    "The daily check compares them with their own normal level and opens one signal that explains why.",
-    "Bluebird Bakery joins the At risk list, sorted by priority.",
-    "The signal carries the subscription's MRR, so you know what's at stake.",
-    "Pick what happens next: a digest for you, a draft to review, or an automatic email.",
-  ];
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   for (const root of document.querySelectorAll<HTMLElement>("[data-signals]")) {
-    const go = root.querySelectorAll<HTMLButtonElement>("[data-go]");
+    const CAPS: string[] = JSON.parse(root.dataset.caps!);
+    const SEQ: number[] = JSON.parse(root.dataset.seq!);
+    const go = root.querySelectorAll<HTMLButtonElement>("[data-states]");
+    const owner = (state: number) => [...go].findIndex((b) => b.dataset.states!.split(",").map(Number).includes(state));
     const cap = root.querySelector<HTMLElement>("[data-cap]")!;
     const play = root.querySelector<HTMLButtonElement>("[data-play]")!;
     let step = 5, timer = 0, visible = false, paused = reduce;
     const show = (s: number) => {
       step = s;
       root.dataset.step = String(s);
-      go.forEach((b, i) => (i === s ? b.setAttribute("aria-current", "step") : b.removeAttribute("aria-current")));
+      const o = owner(s);
+      go.forEach((b, i) => (i === o ? b.setAttribute("aria-current", "step") : b.removeAttribute("aria-current")));
       cap.textContent = CAPS[s];
-      const strip = go[s].closest("ol")!;
-      if (strip.scrollWidth > strip.clientWidth) strip.scrollTo({ left: go[s].offsetLeft - 14, behavior: reduce ? "auto" : "smooth" });
+      const strip = go[o].closest("ol")!;
+      if (strip.scrollWidth > strip.clientWidth) strip.scrollTo({ left: go[o].offsetLeft - 14, behavior: reduce ? "auto" : "smooth" });
     };
-    const tick = () => show((step + 1) % CAPS.length);
+    const tick = () => show(SEQ[(SEQ.indexOf(step) + 1) % SEQ.length]);
     const sync = () => {
       clearInterval(timer);
       if (visible && !paused) timer = window.setInterval(tick, 2800);
@@ -136,8 +165,9 @@ const steps = [
       play.setAttribute("aria-pressed", String(!paused));
       cap.setAttribute("aria-live", paused ? "polite" : "off");
     };
-    go.forEach((b) => b.addEventListener("click", () => { paused = true; show(Number(b.dataset.go)); sync(); }));
-    play.addEventListener("click", () => { paused = !paused; if (!paused && step === CAPS.length - 1) show(0); sync(); });
+    // A click shows that step's final state (for "Activity drops", the drop itself).
+    go.forEach((b) => b.addEventListener("click", () => { paused = true; show(Number(b.dataset.states!.split(",").at(-1))); sync(); }));
+    play.addEventListener("click", () => { paused = !paused; if (!paused && step === SEQ.at(-1)) show(SEQ[0]); sync(); });
     play.hidden = false;
     // The finished frame stays up until the demo first scrolls into view; then it plays from the start.
     let started = false;
@@ -194,14 +224,14 @@ const steps = [
   .act { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
   .cap { font-size: 13px; line-height: 1.5; color: var(--d-ink-2); min-height: 6em; border-top: 1px solid var(--d-line); padding: 12px 10px 0; }
 
-  /* Each layer lights up from its step on. Before that it is a faint preview, so nothing jumps
-     and the frame never looks empty. */
-  .show-2, .show-3, .show-4, .show-5 { transition: opacity 0.45s, filter 0.45s; }
+  /* Each layer fades in at its step. Until then it keeps its space (so nothing jumps) but is
+     hidden, so unreadable half-faded text never sits on screen. */
+  .show-2, .show-3, .show-4, .show-5 { transition: opacity 0.45s, transform 0.45s, visibility 0.45s; }
   [data-step="0"] :is(.show-2, .show-3, .show-4, .show-5),
   [data-step="1"] :is(.show-2, .show-3, .show-4, .show-5),
   [data-step="2"] :is(.show-3, .show-4, .show-5),
   [data-step="3"] :is(.show-4, .show-5),
-  [data-step="4"] .show-5 { opacity: 0.12; filter: saturate(0); }
+  [data-step="4"] .show-5 { opacity: 0; transform: translateY(6px); visibility: hidden; }
   @media (prefers-reduced-motion: reduce) { .bar, .show-2, .show-3, .show-4, .show-5 { transition: none; } }
 
   .cfg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 40px; margin-top: 48px; }
@@ -210,6 +240,10 @@ const steps = [
   .cfg p { font-size: 15px; color: var(--ink-2); }
   .cfg strong { color: var(--ink); font-weight: 600; }
   .example { margin-top: 28px; }
+  .v-simple .risk { display: none; }
+  .aside { margin-top: 24px; font-size: 15px; color: var(--ink-2); max-width: 70ch; }
+  .aside a { display: inline-flex; align-items: center; gap: 4px; font-weight: 600; text-decoration: none; white-space: nowrap; }
+  .aside a:hover { text-decoration: underline; }
 
   @media (max-width: 900px) {
     .stage { grid-template-columns: 1fr; }
@@ -234,7 +268,7 @@ const steps = [
     [data-step="2"] :is(.show-3, .show-4, .show-5),
     [data-step="3"] :is(.show-4, .show-5),
     [data-step="4"] .show-5 { display: none; }
-    .mrr.show-4 { display: inline-flex !important; opacity: 0.12; }
+    :is([data-step="0"], [data-step="1"], [data-step="2"], [data-step="3"]) .mrr.show-4 { display: inline-flex !important; visibility: hidden; }
     .opt { display: none; }
     .area { height: 130px; }
     .when { margin-left: 0; width: 100%; }
