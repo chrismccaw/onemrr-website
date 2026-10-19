@@ -31,7 +31,7 @@ Every product claim was checked against the app's code (October 2026). Keep thes
 - Churn Signals compares each customer with their own history. It is not a prediction, and priority is not a probability. Don't say "AI" or "predict".
 - Automatic retention emails are off by default, never retroactive, and rechecked before each send.
 - Automatic cancellation follow-ups need a **confirmed cancellation and the customer's email**. Stripe provides both; Shopify needs emails added through the API's customer endpoint; Wix cancellations are inferred, so Wix uses the survey link. Activity (retention) follow-ups need a customer email from billing or from `identify`. Don't merge the two.
-- Pricing lives in `src/data/plans.mjs` (homepage and /pricing both read it): Launch $29 and Growth $79 a month, priced by capacity, never by MRR or ARR, with every feature in both. Paid plans aren't live (`paidPlansLive: false`), so prices show as "after early access" and CTAs go to the free signup. Don't add trials, annual prices, grandfathering or end dates without an explicit decision.
+- Pricing lives in `src/data/plans.mjs` (homepage, /pricing and structured data read it; the app mirrors it in `src/lib/billing/plans.ts` and a test there checks they match): Free ($0 forever, no card), Launch $29 and Growth $79 a month, priced by capacity, never by MRR or ARR. Paid plans are live (`paidPlansLive: true`). What happens at a limit (`atLimit`) and the early-access message (`earlyAccess`) must match the app: refused events and skipped emails aren't queued, nothing is deleted, no overage charges. Don't add trials, annual prices, grandfathering or an early-access end date without an explicit decision.
 - No testimonials, customer counts or recovery rates until they exist.
 
 ## Pages
@@ -41,15 +41,13 @@ Every product claim was checked against the app's code (October 2026). Keep thes
 | `/` | The story: one MRR, what's changing, Churn Signals (3 steps), follow-up, trust and pricing, founder, FAQ |
 | `/churn-signals` | Full six-step demo, detection rules, automation settings, cancellation feedback, setup and reporting |
 | `/integrations` | What each billing platform supports, honestly |
-| `/pricing` | Early access, and what's decided about pricing after it |
+| `/pricing` | Free, Launch and Growth: comparison, what counts, what happens at a limit, pricing questions |
 | `/security` | Verified data-handling properties only |
 | `/docs` | Quickstart, connections, how the numbers work, Churn Signals and cancellation setup |
 
 `pnpm check:links` (also in CI) fails the build on any broken internal link or anchor.
 
 ## Launch blockers
-
-- **Paid plans need OneMRR's own billing in the app**: a separate Stripe account, approved products and prices, Checkout, verified webhooks, a billing portal, and usage metering for connections, tracked events and retention emails with in-app warnings. Until then `paidPlansLive` stays false.
 
 - **Have the Privacy Policy and Terms reviewed by a lawyer**, especially liability, indemnity and governing law (California, San Diego County). Revisit both when paid plans or new sub-processors arrive.
 

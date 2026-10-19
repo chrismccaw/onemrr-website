@@ -1,6 +1,7 @@
 ---
 import JsonLd from "../JsonLd.astro";
 import { faqPage } from "../../data/schema.mjs";
+import { atLimitShort, earlyAccess } from "../../data/plans.mjs";
 // Every answer is checked against the app's code; see README "Claims".
 const faqs = [
   {
@@ -10,6 +11,14 @@ const faqs = [
   {
     q: "Is OneMRR free?",
     a: "Yes. The Free plan is free forever with no card: two billing connections, unified MRR and ARR, exports, the API and a Churn Signals rule. Launch ($29) and Growth ($79) a month add retention automation and capacity, and are never priced on your MRR or ARR.",
+  },
+  {
+    q: "What happens if I reach a plan limit?",
+    a: atLimitShort,
+  },
+  {
+    q: "I joined during early access. What changes?",
+    a: earlyAccess,
   },
   {
     q: "How does OneMRR help with churn?",
