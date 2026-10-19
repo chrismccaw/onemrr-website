@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 
-const PAGES = ["/", "/churn-signals", "/integrations", "/pricing", "/security", "/docs"];
+const PAGES = ["/", "/churn-signals", "/integrations", "/pricing", "/security", "/docs", "/privacy", "/terms"];
 
 export const GET: APIRoute = ({ site }) =>
   new Response(

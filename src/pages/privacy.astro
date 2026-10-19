@@ -1,0 +1,99 @@
+---
+import Base from "../layouts/Base.astro";
+import PageHead from "../components/PageHead.astro";
+// Written from what chrismccaw/OneMRR actually does (October 2026), not a template. Update
+// it whenever data flows or sub-processors change. Sources: Better Auth sessions (ip_address, user_agent), connectors, tracking
+// (account ID, event name, time; browser-ping user values hashed; retention default 400 days,
+// pruned nightly), Postmark delivery and inbound events, survey responses (reason + optional
+// comment), CloudWatch logs 30 days, RDS encrypted with 7-day backups, AWS us-west-2,
+// no analytics or AI providers in the app, no cookies on this site.
+const company = "Architect Spot LLC";
+const email = "hello@onemrr.dev";
+---
+<Base title="Privacy Policy · OneMRR" description="How OneMRR handles personal information: what we collect, why, who else handles it, and how you control it." path="/privacy">
+  <PageHead title="Privacy Policy" lede="What OneMRR collects, why, who else handles it, and how you control it. Written in plain English." />
+  <section class="band tight legal">
+    <div class="wrap"><div class="prose">
+      <p class="meta">Effective date: October 18, 2026</p>
+
+      <p>{company} ("OneMRR", "we", "us") runs the OneMRR website at onemrr.dev and the OneMRR app at app.onemrr.dev. This policy explains how we handle personal information in both.</p>
+
+      <h2>Two kinds of data</h2>
+      <p>When you sign up, we're responsible for your account details. When you connect billing platforms or send us activity data, much of what we receive is about <strong>your customers</strong>. For that data we act on your behalf and only as you instruct: you decide what to connect, and you can disconnect or delete it. If you're one of our customers' customers and have a question about your data, please contact the business you have a subscription with first. We'll help them respond.</p>
+
+      <h2>The website</h2>
+      <p>onemrr.dev sets no cookies and runs no analytics or advertising trackers. Pages are served through Amazon CloudFront, and we don't keep access logs for the website.</p>
+
+      <h2>What we collect in the app</h2>
+      <h3>Your account</h3>
+      <ul>
+        <li>Your name, email address and password (stored as a secure hash), or your Google account details if you sign in with Google.</li>
+        <li>Your workspaces, your role in each (owner, admin or member), and invitations you send or receive.</li>
+        <li>Session records, including the IP address and browser details used to sign in. Sessions end 3 days after you last used the app.</li>
+      </ul>
+      <h3>Data from billing platforms you connect</h3>
+      <ul>
+        <li>Credentials for Stripe, Shopify, Wix, Paddle, Lemon Squeezy or your own API source. These are encrypted before they're stored and never shown again.</li>
+        <li>Billing records read from those platforms: customers (including names and email addresses where the platform provides them), subscriptions, plans, invoices, payments, refunds and payouts, and the metadata attached to them.</li>
+        <li>Files you upload, such as Wix payout exports.</li>
+        <li>Anything you enter yourself, such as tags, plan names and marketing spend.</li>
+      </ul>
+      <h3>Product activity (Churn Signals)</h3>
+      <ul>
+        <li>If you use Churn Signals, your server sends us your own account IDs, event names and times. We store daily counts per account, plus each event's ID so a retry isn't counted twice. We don't store event properties, page URLs or IP addresses.</li>
+        <li>You may link an account to a customer email address so follow-up emails can reach them.</li>
+        <li>If you send activity from a browser, any user identifier you include is hashed before it's stored.</li>
+      </ul>
+      <h3>Emails and surveys</h3>
+      <ul>
+        <li>Emails OneMRR sends for you (retention check-ins and cancellation surveys), with their delivery status: delivered, opened, clicked, bounced, marked as spam, or unsubscribed.</li>
+        <li>Replies your customers send to those emails, stored as plain text and forwarded to the reply-to address you set.</li>
+        <li>Survey answers: the reason chosen and any comment written.</li>
+        <li>Unsubscribes and bounces, which we keep so we don't email those addresses again.</li>
+      </ul>
+
+      <h2>How we use it</h2>
+      <ul>
+        <li>To provide OneMRR: calculating revenue metrics, detecting churn signals, and sending the emails you configure.</li>
+        <li>To send you service emails, such as invitations, password resets, source alerts and summaries you've turned on.</li>
+        <li>To keep the service secure, prevent abuse, and fix problems.</li>
+      </ul>
+      <p>We don't sell personal information, don't use it for advertising, and don't use your data or your customers' data to train AI models.</p>
+
+      <h2>Who else handles it</h2>
+      <p>We use a small number of providers to run OneMRR:</p>
+      <ul>
+        <li><strong>Amazon Web Services</strong> (United States): hosting, database, file storage and email sending.</li>
+        <li><strong>Postmark</strong>: email delivery, delivery tracking and receiving replies.</li>
+        <li><strong>Google</strong>: sign-in, if you choose to sign in with Google.</li>
+      </ul>
+      <p>The billing platforms you connect are your own accounts. We read from them on your instruction, and their own privacy policies apply. We'll disclose information if the law requires it, and we'll tell you first where we're allowed to.</p>
+
+      <h2>Where it's stored</h2>
+      <p>OneMRR runs on AWS in the United States (us-west-2). If you're outside the United States, your information is transferred there. The database is encrypted at rest.</p>
+
+      <h2>How long we keep it</h2>
+      <ul>
+        <li>Account and billing data: for as long as your workspace exists.</li>
+        <li>Activity data: 400 days by default, or the shorter period you set. Older data is deleted nightly, and you can delete tracked activity at any time.</li>
+        <li>Server logs: 30 days. Database backups: 7 days.</li>
+        <li>When you ask us to delete your workspace, we delete its data within 30 days, apart from what remains in backups until they expire.</li>
+      </ul>
+
+      <h2>Your choices and rights</h2>
+      <p>You can update your account details, remove members, disconnect billing sources, delete tracked activity, and export your revenue and customer data as CSV. To get a copy of your personal data, correct it or have it deleted, or to delete your workspace, email <a href={`mailto:${email}`}>{email}</a>. Depending on where you live, you may have further rights, such as objecting to processing or complaining to a data protection authority.</p>
+
+      <h2>Security</h2>
+      <p>Our <a href="/security">security page</a> describes how we protect your data, including read-only billing access, encrypted credentials and isolated workspaces.</p>
+
+      <h2>Children</h2>
+      <p>OneMRR is a business tool and isn't meant for anyone under 16.</p>
+
+      <h2>Changes</h2>
+      <p>If we change this policy in a way that matters, we'll update this page and tell workspace owners by email before the change takes effect.</p>
+
+      <h2>Contact</h2>
+      <p>{company}, 1150 Garden View Rd, Unit 230056, Encinitas, CA 92024, USA. Email: <a href={`mailto:${email}`}>{email}</a>.</p>
+    </div></div>
+  </section>
+</Base>
