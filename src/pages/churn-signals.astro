@@ -1,0 +1,50 @@
+---
+import Base from "../layouts/Base.astro";
+import PageHead from "../components/PageHead.astro";
+import Icon from "../components/Icon.astro";
+import Signals from "../components/sections/Signals.astro";
+import Retention from "../components/sections/Retention.astro";
+import Recovery from "../components/sections/Recovery.astro";
+import { APP } from "../data/links.mjs";
+---
+<Base title="Churn Signals and recovery · OneMRR" description="See which paying customers are drifting away and how much MRR is at stake, then follow up with branded emails and cancellation surveys you control." path="/churn-signals">
+  <PageHead title="Churn Signals and recovery" lede="See which paying customers are drifting away and what's at stake, then follow up in your own brand, on your terms.">
+    <a class="btn primary" href={APP.signup}>Get started <Icon name="arrow-right" class="arrow" /></a>
+    <a class="btn secondary" href="/docs#churn-signals">Read the setup guide</a>
+  </PageHead>
+
+  <Signals variant="full" head={false} />
+
+  <Retention />
+
+  <Recovery />
+
+  <section class="band tight" id="setup" aria-labelledby="setup-h">
+    <div class="wrap two">
+      <div class="prose">
+        <h2 id="setup-h">What you set up</h2>
+        <p>Revenue analytics only needs a billing connection. Churn Signals also needs to know when customers use your product, so your server reports a few key events.</p>
+        <pre><code>npm install @onemrr/node
+
+onemrr.identify({'{'} accountId: "merchant_123", source: "shopify",
+  externalCustomerId: "merchant-123.myshopify.com" {'}'});
+onemrr.track({'{'} accountId: "merchant_123", event: "event_published" {'}'});</code></pre>
+        <p>OneMRR keeps only the account ID, the event name and its time. No properties, page URLs, IP addresses or user details. Secret keys are refused from browsers.</p>
+        <p><a href="/docs#churn-signals">Full setup guide</a></p>
+      </div>
+      <div class="prose">
+        <h2>What you can measure</h2>
+        <p>A fixed number of days after each signal, OneMRR records what happened: the customer cancelled, their activity recovered, they're still subscribed, or the signal was dismissed.</p>
+        <ul>
+          <li>How useful each rule is: how often its signals end in a cancellation or a recovery, and how many were false alarms.</li>
+          <li>The outreach funnel: sent, delivered, opened, clicked, replied.</li>
+          <li>Emailed versus not emailed, labelled as a correlation, not proof that email caused the result.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</Base>
+<style>
+  .two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 56px; align-items: start; }
+  @media (max-width: 900px) { .two { grid-template-columns: 1fr; gap: 40px; } }
+</style>

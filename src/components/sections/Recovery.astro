@@ -68,7 +68,7 @@ const custom = ["Company name", "Logo", "Brand color", "Sender name", "Subject a
     <ul class="custom" aria-label="What you can customize">
       {custom.map((c) => <li>{c}</li>)}
     </ul>
-    <p class="note limit">Automatic emails go to Stripe customers. Shopify and Wix don't give apps their customers' email addresses, so for marketplace cancellations OneMRR gives you a survey link to send yourself.</p>
+    <p class="note limit">Automatic follow-ups need a confirmed cancellation and the customer's email. Stripe provides both. Shopify confirms cancellations but doesn't share emails, so add them from your app through the API. Wix cancellations are estimated from payouts, so share the survey link there. <a href="/integrations">Compare platforms</a></p>
   </div>
 </section>
 <script>

@@ -161,7 +161,7 @@ html { accent-color: var(--indigo); }
   font-size: 9px; font-weight: 700; color: #fff; line-height: 1;
 }
 .badge.stripe { background: #635bff; }
-.badge.shopify { background: #4f8a2b; }
+.badge.shopify { background: #437a26; }
 .badge.wix { background: #111827; box-shadow: inset 0 0 0 1px #343c5d; }
 .badge.sm { width: 12px; height: 12px; font-size: 7.5px; border-radius: 3px; }
 .seg { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--d-line); border-radius: 8px; overflow: hidden; background: var(--d-sunken); }
@@ -207,3 +207,17 @@ html { accent-color: var(--indigo); }
   .band { padding-block: 64px; }
   .lede { font-size: 17px; }
 }
+
+/* ---------------------------------------------------------------- inner-page prose */
+.prose { max-width: 68ch; display: grid; gap: 16px; font-size: 16.5px; color: var(--ink-2); }
+.prose h2 { font-size: clamp(24px, 3vw, 30px); font-weight: 650; letter-spacing: -0.03em; line-height: 1.15; color: var(--ink); margin-top: 32px; scroll-margin-top: 88px; }
+.prose h2:first-child { margin-top: 0; }
+.prose h3 { font-size: 18px; font-weight: 650; letter-spacing: -0.015em; color: var(--ink); margin-top: 12px; scroll-margin-top: 88px; }
+.prose strong { color: var(--ink); font-weight: 600; }
+.prose ul, .prose ol { padding-left: 20px; display: grid; gap: 8px; }
+.prose li::marker { color: var(--ink-3); }
+.prose code { background: var(--canvas); border: 1px solid var(--line); border-radius: 5px; padding: 1px 5px; color: var(--ink); }
+.prose pre { margin: 0; background: var(--d-bg); color: #d8dcf0; border-radius: 12px; padding: 16px 18px; font-family: var(--mono); font-size: 13px; line-height: 1.7; overflow-x: auto; }
+.prose pre code { background: none; border: 0; padding: 0; color: inherit; }
+.prose .callout { color: var(--ink-3); font-size: 15px; }
+.prose a { font-weight: 500; }

@@ -3,11 +3,12 @@ import Icon from "../Icon.astro";
 import { sources, mrr, usd } from "../../data/demo.mjs";
 
 const list = [
-  { mark: "S", color: "#635bff", name: "Stripe", sub: "Subscriptions, invoices and refunds", tag: "Live" },
-  { mark: "S", color: "#4f8a2b", name: "Shopify App Store", sub: "App billing from the Partner API", tag: "Live" },
-  { mark: "W", color: "#111827", name: "Wix App Market", sub: "Payout exports, with estimates labelled", tag: "Live" },
-  { mark: "P", color: "#8a6d00", name: "Paddle and Lemon Squeezy", sub: "Read-only API keys", tag: "Beta" },
-  { mark: "{}", color: "#4535e6", name: "Your own billing", sub: "Send customers and subscription events to the API", tag: "API" },
+  { mark: "S", color: "#635bff", name: "Stripe" },
+  { mark: "S", color: "#437a26", name: "Shopify App Store" },
+  { mark: "W", color: "#111827", name: "Wix App Market" },
+  { mark: "P", color: "#8a6d00", name: "Paddle", tag: "Beta" },
+  { mark: "L", color: "#b8326b", name: "Lemon Squeezy", tag: "Beta" },
+  { mark: "{}", color: "#4535e6", name: "Your own billing (API)" },
 ];
 // Small multiples share one scale, as in the app.
 const max = 25000;
@@ -20,15 +21,16 @@ const spark = (h: number[]) => {
   <div class="wrap split">
     <div class="head">
       <h2 class="h2" id="platforms-h">Every platform. One MRR.</h2>
-      <p class="lede">Selling on the Shopify App Store, the Wix App Market and Stripe? Stripe's dashboard only sees Stripe. OneMRR puts every platform in one subscription ledger, so MRR means the same thing everywhere.</p>
-      <ul class="list">
+      <p class="lede">Stripe's dashboard only sees Stripe. OneMRR combines your Stripe, Shopify App Store and Wix App Market billing into one MRR, so the number means the same thing everywhere.</p>
+      <ul class="chips" aria-label="Billing sources">
         {list.map((s) => (
-          <li>
-            <span class="mark" style={`background:${s.color}`} aria-hidden="true">{s.mark}</span>
-            <span><span class="n">{s.name}</span><span class="s">{s.sub}</span></span>
-            <span class={`tag ${s.tag.toLowerCase()}`}>{s.tag}</span>
-          </li>
+          <li><span class="mark" style={`background:${s.color}`} aria-hidden="true">{s.mark}</span>{s.name}{s.tag ? <span class="tag">{s.tag}</span> : null}</li>
         ))}
+      </ul>
+      <ul class="points notes">
+        <li><span>MRR is counted before marketplace commissions. Revenue after fees is shown separately.</span></li>
+        <li><span>Wix doesn't share live subscription data, so Wix MRR is estimated from payout exports and labelled.</span></li>
+        <li><span>Each platform connects differently and shares different data. <a href="/integrations">Compare platforms</a></span></li>
       </ul>
     </div>
     <figure>
@@ -61,15 +63,13 @@ const spark = (h: number[]) => {
   </div>
 </section>
 <style>
-  .list { list-style: none; padding: 0; margin-top: 12px; border: 1px solid var(--line); border-radius: 12px; background: #fff; overflow: hidden; }
-  .list li { display: grid; grid-template-columns: 24px 1fr auto; gap: 12px; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--line); }
-  .list li:last-child { border-bottom: 0; }
-  .mark { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 6px; color: #fff; font-size: 11px; font-weight: 700; }
-  .n { display: block; font-size: 15px; font-weight: 550; }
-  .s { display: block; font-size: 13px; color: var(--ink-3); }
-  .tag { font-size: 11.5px; font-weight: 600; padding: 3px 9px; border-radius: 999px; background: var(--good-wash); color: var(--good); }
-  .tag.beta { background: var(--warn-wash); color: var(--warn); }
-  .tag.api { background: var(--indigo-wash); color: var(--indigo-strong); }
+  .chips { list-style: none; padding: 0; margin-top: 8px; display: flex; flex-wrap: wrap; gap: 8px; }
+  .chips li { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px 6px 6px; border: 1px solid var(--line); border-radius: 999px; background: #fff; font-size: 14px; font-weight: 500; }
+  .mark { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; color: #fff; font-size: 10.5px; font-weight: 700; }
+  .tag { font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 999px; background: var(--warn-wash); color: var(--warn); }
+  .notes { margin-top: 16px; font-size: 14.5px; }
+  .notes a { font-weight: 600; text-decoration: none; }
+  .notes a:hover { text-decoration: underline; }
   .mults { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
   .mult { display: grid; gap: 4px; }
   .v { font-size: 22px; font-weight: 650; letter-spacing: -0.025em; }

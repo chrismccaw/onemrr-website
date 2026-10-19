@@ -1,0 +1,75 @@
+---
+import Icon from "../Icon.astro";
+import { recon, usd } from "../../data/demo.mjs";
+const explained = recon.rows.reduce((a, r) => a + r.diff, 0);
+// Every claim here is checked against the app: read-only connectors, AES-256-GCM credential
+// encryption (src/lib/crypto.ts), Postgres row-level security under the onemrr_app role, and
+// outreach that is off until a workspace turns it on.
+const pillars = [
+  {
+    t: "Transparent calculations",
+    p: "See why MRR differs from what you billed recently. Each difference gets a plain reason, and every number opens to the subscriptions behind it.",
+    href: "/docs#reconciliation",
+    link: "How the numbers are calculated",
+  },
+  {
+    t: "Careful with your data",
+    p: "OneMRR only reads from your billing platforms. Credentials are encrypted and never shown again, every workspace is kept apart in the database, and customers are only emailed when you turn sending on.",
+    href: "/security",
+    link: "Security and data handling",
+  },
+  {
+    t: "Predictable pricing",
+    p: "Free during early access. When paid plans arrive, they won't be priced on your MRR or ARR, so growing doesn't raise your bill.",
+    href: "/pricing",
+    link: "Pricing",
+  },
+];
+---
+<section class="band canvas" id="trust" aria-labelledby="trust-h">
+  <div class="wrap">
+    <div class="head">
+      <h2 class="h2" id="trust-h">Numbers you can trust. Pricing you can predict.</h2>
+      <p class="lede">You're connecting your billing data and letting a tool talk to your customers. Here's what that means.</p>
+    </div>
+    <div class="grid">
+      <figure class="app">
+        <figcaption class="panel cap">
+          <span class="title">Reconciliation · {recon.source}</span>
+          <span class="muted">MRR {usd(recon.onemrr)} · billed in the last 30 days {usd(recon.billed)}</span>
+        </figcaption>
+        <table class="dtable">
+          <thead><tr><th>Why they differ</th><th class="r">Customers</th><th class="r">Difference</th></tr></thead>
+          <tbody>
+            {recon.rows.map((r) => (
+              <tr><td>{r.diff === 0 ? <span class="dot" aria-hidden="true"></span> : null}{r.label}</td><td class="r">{r.customers}</td><td class="r">{usd(r.diff, true)}</td></tr>
+            ))}
+            <tr><td class="strong">Explained</td><td></td><td class="r strong">{usd(explained, true)}</td></tr>
+          </tbody>
+        </table>
+      </figure>
+      <ul class="pillars">
+        {pillars.map((x) => (
+          <li>
+            <h3>{x.t}</h3>
+            <p>{x.p}</p>
+            <a href={x.href}>{x.link} <Icon name="arrow-right" size={14} /></a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+</section>
+<style>
+  .grid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); gap: 56px; align-items: start; }
+  .cap { display: grid; gap: 4px; padding-bottom: 12px; }
+  .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--d-good); margin-right: 8px; vertical-align: 1px; }
+  .pillars { list-style: none; padding: 0; display: grid; gap: 0; }
+  .pillars li { display: grid; gap: 8px; padding: 22px 0; border-top: 1px solid var(--line-2); }
+  .pillars li:first-child { padding-top: 0; border-top: 0; }
+  .pillars h3 { font-size: 18px; font-weight: 650; letter-spacing: -0.015em; }
+  .pillars p { font-size: 15.5px; color: var(--ink-2); max-width: 52ch; }
+  .pillars a { display: inline-flex; align-items: center; gap: 5px; justify-self: start; font-size: 14.5px; font-weight: 600; text-decoration: none; }
+  .pillars a:hover { text-decoration: underline; }
+  @media (max-width: 900px) { .grid { grid-template-columns: 1fr; gap: 40px; } }
+</style>

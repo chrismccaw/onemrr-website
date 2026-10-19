@@ -1,0 +1,105 @@
+---
+import Base from "../layouts/Base.astro";
+import PageHead from "../components/PageHead.astro";
+import { APP, SDK } from "../data/links.mjs";
+// Ported from chrismccaw/onemrr-docs quickstart.mdx, checked against the app. The docs repo's
+// "demo workspace" tip is left out: nothing in the app creates that account.
+const toc = [
+  { href: "#quickstart", t: "Quickstart" },
+  { href: "#connect", t: "Connect billing" },
+  { href: "#reconciliation", t: "How the numbers work" },
+  { href: "#churn-signals", t: "Churn Signals" },
+  { href: "#cancellation-feedback", t: "Cancellation feedback" },
+  { href: "#api", t: "API and SDK" },
+];
+---
+<Base title="Docs · OneMRR" description="Connect your billing platforms, check your MRR, and set up Churn Signals and cancellation feedback." path="/docs">
+  <PageHead title="Docs" lede="Connect your billing platform and see your MRR in a few minutes. Then, if you want, set up Churn Signals and follow-ups." />
+  <section class="band tight">
+    <div class="wrap layout">
+      <nav class="toc" aria-label="On this page">
+        <ul>{toc.map((x) => <li><a href={x.href}>{x.t}</a></li>)}</ul>
+      </nav>
+      <article class="prose">
+        <h2 id="quickstart">Quickstart</h2>
+        <ol>
+          <li><strong>Create your workspace.</strong> <a href={APP.signup}>Sign up</a> with email or Google. A workspace is your business; invite teammates later from <strong>Team</strong>.</li>
+          <li><strong>Connect a billing platform.</strong> Go to <strong>Connections → Add source</strong> and paste the credentials below. You can connect several platforms, and more than one account of each.</li>
+          <li><strong>Let it import.</strong> The first import starts right away and usually takes under a minute per year of history. After that, OneMRR checks each source for changes every 10 minutes and runs a full sync every night.</li>
+          <li><strong>Check the numbers.</strong> Open <strong>Overview</strong> for MRR, ARR and this month's revenue movements. Click any month or movement to see the customers behind it.</li>
+        </ol>
+
+        <h2 id="connect">Connect billing</h2>
+        <p>OneMRR checks credentials with a read-only call, encrypts them, and never shows them again.</p>
+        <h3>Stripe</h3>
+        <p>Create a restricted key (<strong>Developers → API keys → Create restricted key</strong>) with <strong>Read</strong> access to Customers, Subscriptions, Invoices, Products, Prices, Coupons, Charges, Balance and Events, and paste the <code>rk_live_…</code> key. After the import, untick any products that aren't subscriptions under <strong>Products counted as MRR</strong>.</p>
+        <h3>Shopify App Store</h3>
+        <p>In the Partner Dashboard, create a Partner API client with <strong>View financials</strong> and <strong>Manage apps</strong>. You'll need your Partner organization ID, the API token and your app's ID. Shopify's fees are tracked separately from gross MRR.</p>
+        <h3>Wix App Market</h3>
+        <p>Add a Wix source and upload your app's payout export (CSV) from the Wix developer center, then upload each new export as it arrives. Wix doesn't share live subscription state, so Wix MRR is estimated from payouts and labelled as such. To keep it current between exports, send billing records from your app through the API.</p>
+        <h3>Paddle and Lemon Squeezy <span class="beta">Beta</span></h3>
+        <p>Paste a read-only API key. Paddle reports its fee on every transaction; for Lemon Squeezy, set your fee rate in <strong>Settings</strong>.</p>
+        <h3>Your own billing</h3>
+        <p>Add a <strong>Custom (API)</strong> source and send customers, payments and subscription events from your server. See <a href="#api">API and SDK</a>.</p>
+
+        <h2 id="reconciliation">How the numbers work</h2>
+        <ul>
+          <li><strong>MRR</strong> is the monthly value of active subscriptions. Annual plans count as one-twelfth a month.</li>
+          <li><strong>Standard MRR</strong> is before marketplace commissions. Switch to <strong>after commissions</strong> to see revenue net of Wix's revenue share and Shopify's and Paddle's fees.</li>
+          <li><strong>Revenue movements</strong> split each month's change into new, expansion, reactivation, contraction and churn.</li>
+          <li><strong>Reconciliation</strong>, on <strong>Connections</strong>, compares each source's MRR with what the platform billed recently and explains every difference by customer: annual plans, refunds, prorations, discounts or subscriptions that exist on only one side.</li>
+        </ul>
+
+        <h2 id="churn-signals">Churn Signals</h2>
+        <p>Churn Signals flags paying customers whose product activity drops well below their own normal. It needs a few events from your server.</p>
+        <pre><code>npm install @onemrr/node
+
+import {'{'} OneMRR {'}'} from "@onemrr/node";
+const onemrr = new OneMRR({'{'} apiKey: process.env.ONEMRR_API_KEY {'}'});
+
+// Once per account: link your account ID to its billing customer.
+await onemrr.identify({'{'}
+  accountId: "merchant_123",
+  email: "merchant@example.com", // optional; used for follow-up emails
+  source: "shopify",
+  externalCustomerId: "merchant-123.myshopify.com",
+{'}'});
+
+// Whenever something meaningful happens.
+onemrr.track({'{'} accountId: "merchant_123", event: "event_published" {'}'});</code></pre>
+        <p>Create the key under <strong>Settings → API keys</strong>; a key can be limited to tracking. Then, under <strong>Churn → Settings</strong>:</p>
+        <ol>
+          <li>Mark which events are <strong>key</strong> (the value customers pay for), <strong>engagement</strong>, or ignored.</li>
+          <li>Choose how your product is used: daily, weekly, monthly, seasonal, or every few days.</li>
+          <li>Turn on detection. Starter rules flag activity that drops by 60% or more, or stops for twice a customer's usual gap. Adjust any threshold.</li>
+          <li>Under <strong>Automations</strong>, choose what each rule does: notify you, prepare an email for review, or email automatically.</li>
+        </ol>
+        <p class="callout">Automatic emails need a published retention email and a verified reply-to address, and stay off until you turn them on. Signals are a priority list based on each customer's own history, not a churn probability.</p>
+
+        <h2 id="cancellation-feedback">Cancellation feedback</h2>
+        <p>Under <strong>Churn → Settings → Cancellation survey</strong>, set your brand (name, logo, color, sender), your survey question and three to eight reasons, and the email copy. Preview it, send yourself a test, and publish. Then turn on automation under <strong>Automations</strong>.</p>
+        <p>Automatic emails need a confirmed cancellation and the customer's email. Stripe provides both. For Shopify, send customer emails from your app through the API's customer endpoint. Wix cancellations are estimated, so copy the survey link from a cancellation and send it yourself.</p>
+
+        <h2 id="api">API and SDK</h2>
+        <ul>
+          <li><a href={SDK}><code>@onemrr/node</code> on npm</a>: activity tracking for Churn Signals.</li>
+          <li><a href={APP.openapi}>OpenAPI specification</a>: customers, billing records, subscription events, identify and track.</li>
+        </ul>
+      </article>
+    </div>
+  </section>
+</Base>
+<style>
+  .layout { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 56px; align-items: start; }
+  .toc { position: sticky; top: calc(88px + env(safe-area-inset-top, 0px)); }
+  .toc ul { list-style: none; padding: 0; display: grid; gap: 2px; border-left: 1px solid var(--line); }
+  .toc a { display: block; padding: 6px 0 6px 14px; margin-left: -1px; border-left: 1px solid transparent; font-size: 14px; color: var(--ink-2); text-decoration: none; }
+  .toc a:hover { color: var(--ink); border-left-color: var(--ink-3); }
+  .beta { font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 999px; background: var(--warn-wash); color: var(--warn); vertical-align: 3px; }
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; gap: 24px; }
+    .toc { position: static; }
+    .toc ul { display: flex; flex-wrap: wrap; gap: 6px; border-left: 0; }
+    .toc a { padding: 6px 12px; margin: 0; border: 1px solid var(--line); border-radius: 999px; }
+  }
+</style>

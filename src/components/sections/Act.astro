@@ -1,0 +1,174 @@
+---
+import Icon from "../Icon.astro";
+import { workspace, bluebirdSignal } from "../../data/demo.mjs";
+// Homepage version of the follow-up story. The full settings (delay, sending hours, daily
+// limit, suppressions) live on /churn-signals. Labels match the app's Automations screen.
+const modes = [
+  { k: "notify", label: "Notify me", status: "No email. Bluebird Bakery appears in your daily digest." },
+  { k: "draft", label: "Prepare an email", status: "A draft waits for your review in At risk." },
+  { k: "auto", label: "Email automatically", status: "Sends after your chosen delay, once every check passes." },
+];
+// The app's default cancellation survey reasons (revspot/src/lib/recovery/shared.ts).
+const reasons = ["Too expensive", "Missing features", "Not using it enough", "Switching to another product", "Other"];
+---
+<section class="band" id="retention" aria-labelledby="act-h">
+  <div class="wrap">
+    <div class="head">
+      <h2 class="h2" id="act-h">Turn warning signs into action.</h2>
+      <p class="lede">Send thoughtful, branded follow-ups when customers may need help. You choose the triggers, the timing and the message.</p>
+    </div>
+
+    <ol class="story">
+      <li class="frame">
+        <h3><span class="n">1</span>A signal fires</h3>
+        <div class="box app">
+          <div class="row-h"><span class="pill high">High</span><span class="title sm">Activity dropped</span></div>
+          <div class="who"><span class="av">BB</span><span><b>Bluebird Bakery</b><span class="muted">Growth · $79 MRR</span></span></div>
+          <p class="soft small">Key activity fell {bluebirdSignal.dropPct}% against their own normal.</p>
+        </div>
+      </li>
+      <li class="frame">
+        <h3><span class="n">2</span>Your email, your brand</h3>
+        <div class="box mail-mini">
+          <div class="mail-brand"><span class="mail-logo">{workspace.initial}</span>{workspace.name}</div>
+          <h4>Anything we can help with?</h4>
+          <p>Hi Ana, just checking in to see how things are going with {workspace.name}. If anything's getting in the way, we'd love to hear.</p>
+          <span class="mail-btn">Book a 15-minute call</span>
+        </div>
+      </li>
+      <li class="frame" data-modes>
+        <h3><span class="n">3</span>You choose how it sends</h3>
+        <div class="box app">
+          <div class="seg col" role="group" aria-label="When this rule flags a customer">
+            {modes.map((m) => <button type="button" data-mode={m.k} aria-pressed={m.k === "draft" ? "true" : "false"}>{m.label}</button>)}
+          </div>
+          <p class="status" data-status aria-live="polite">{modes[1].status}</p>
+          <p class="muted fine">Automatic sending stays off until you turn it on, and needs a verified reply-to address.</p>
+        </div>
+      </li>
+      <li class="frame">
+        <h3><span class="n">4</span>Replies come back to you</h3>
+        <div class="box app">
+          <div class="muted">Conversation · Bluebird Bakery</div>
+          <div class="bubble">
+            <span class="muted">Ana replied · 2 hours later</span>
+            <p>Thanks for checking in! The weekly report stopped arriving after we changed plans. Could you take a look?</p>
+          </div>
+          <p class="soft small">Answer from OneMRR in the same thread. A copy goes to your inbox.</p>
+        </div>
+      </li>
+    </ol>
+
+    <div class="cancel" data-survey>
+      <div class="c-copy">
+        <h3>When someone cancels, ask why.</h3>
+        <p>OneMRR can send a short email and a one-question survey in your brand. Answers are grouped by reason, so you know what to fix first.</p>
+      </div>
+      <div class="c-demo">
+        <div class="box mail-mini">
+          <div class="mail-brand"><span class="mail-logo">{workspace.initial}</span>{workspace.name}</div>
+          <h4>Could we ask you one quick question?</h4>
+          <p>Thanks for giving {workspace.name} a try. Would you tell us what made you decide to cancel?</p>
+          <span class="mail-btn">Share feedback</span>
+        </div>
+        <Icon name="arrow-right" size={20} class="c-arrow" />
+        <fieldset class="box survey">
+          <legend>What was the main reason? <span class="try">Try it</span></legend>
+          {reasons.map((r) => (
+            <label class="reason"><input type="radio" name="cancel-reason" value={r} checked={r === "Missing features"} /> {r}</label>
+          ))}
+          <p class="recorded" data-recorded aria-live="polite"><Icon name="check" size={14} /> Recorded as <b>Missing features</b> in your cancellation report</p>
+        </fieldset>
+      </div>
+    </div>
+
+    <p class="note limits">
+      Automatic cancellation follow-ups need a confirmed cancellation and the customer's email: Stripe provides both, Shopify needs emails added through the API, and for Wix you share the survey link. Activity follow-ups work on any platform once OneMRR knows the customer's email.
+      <a href="/integrations">Compare platforms <Icon name="arrow-right" size={13} /></a>
+    </p>
+  </div>
+</section>
+<script>
+  const STATUS: Record<string, string> = {
+    notify: "No email. Bluebird Bakery appears in your daily digest.",
+    draft: "A draft waits for your review in At risk.",
+    auto: "Sends after your chosen delay, once every check passes.",
+  };
+  for (const root of document.querySelectorAll<HTMLElement>("[data-modes]")) {
+    const buttons = root.querySelectorAll<HTMLButtonElement>("[data-mode]");
+    const status = root.querySelector<HTMLElement>("[data-status]")!;
+    buttons.forEach((b) =>
+      b.addEventListener("click", () => {
+        buttons.forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+        status.textContent = STATUS[b.dataset.mode!];
+        status.dataset.kind = b.dataset.mode;
+      }),
+    );
+  }
+  for (const root of document.querySelectorAll<HTMLElement>("[data-survey]")) {
+    const out = root.querySelector<HTMLElement>("[data-recorded] b")!;
+    root.querySelectorAll<HTMLInputElement>('input[type="radio"]').forEach((r) =>
+      r.addEventListener("change", () => { if (r.checked) out.textContent = r.value; }),
+    );
+  }
+</script>
+<style>
+  .story { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+  .frame { display: grid; grid-template-rows: auto 1fr; gap: 12px; min-width: 0; }
+  .frame h3 { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+  .n { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--ink); color: #fff; font-size: 12px; font-weight: 600; flex: none; }
+  .box { border-radius: 12px; padding: 16px; display: grid; gap: 10px; align-content: start; min-height: 232px; }
+  .row-h { display: flex; align-items: center; gap: 8px; }
+  .title.sm { font-size: 13.5px; }
+  .who { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 9px; background: var(--d-surface); border: 1px solid var(--d-line); }
+  .who b { display: block; font-weight: 600; font-size: 13px; }
+  .who .muted { display: block; }
+  .small { font-size: 12.5px; }
+  .mail-mini { background: #fff; border: 1px solid var(--line); color: #18181b; font-size: 13px; }
+  .mail-mini h4 { font-size: 16px; letter-spacing: -0.01em; line-height: 1.3; color: #18181b; }
+  .mail-mini p { color: #52525b; line-height: 1.5; }
+  .mail-mini .mail-brand { font-size: 13.5px; }
+  .mail-mini .mail-logo { width: 20px; height: 20px; font-size: 10.5px; }
+  .mail-mini .mail-btn { font-size: 13px; padding: 8px 12px; }
+  .seg.col { display: grid; }
+  .seg.col > * { border-right: 0; border-bottom: 1px solid var(--d-line); padding: 9px 12px; font-size: 12.5px; }
+  .seg.col > *:last-child { border-bottom: 0; }
+  .status { font-size: 12.5px; font-weight: 600; color: var(--d-accent-2); background: var(--d-wash); border-radius: 8px; padding: 8px 10px; }
+  .status[data-kind="notify"] { color: var(--d-ink-2); background: var(--d-surface); }
+  .status[data-kind="auto"] { color: var(--d-good); background: var(--d-good-wash); }
+  .fine { font-size: 11.5px; line-height: 1.45; }
+  .bubble { display: grid; gap: 4px; padding: 10px 12px; border-radius: 10px 10px 10px 3px; background: var(--d-surface); border: 1px solid var(--d-line); }
+  .bubble p { font-size: 13px; color: var(--d-ink); line-height: 1.5; }
+
+  .cancel { display: grid; grid-template-columns: minmax(0, 0.75fr) minmax(0, 1.25fr); gap: 48px; align-items: center; margin-top: 72px; padding-top: 56px; border-top: 1px solid var(--line); }
+  .c-copy { display: grid; gap: 10px; }
+  .c-copy h3 { font-size: 24px; font-weight: 650; letter-spacing: -0.025em; line-height: 1.2; }
+  .c-copy p { font-size: 16px; color: var(--ink-2); max-width: 44ch; }
+  .c-demo { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 14px; align-items: center; }
+  .c-demo :global(.c-arrow) { color: var(--ink-3); }
+  .survey { margin: 0; background: #fff; border: 1px solid var(--line); min-height: 0; color: #18181b; }
+  .survey legend { float: left; width: 100%; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 14px; font-weight: 600; margin-bottom: 4px; padding: 0; }
+  .try { font-size: 11.5px; font-weight: 600; color: var(--brand); }
+  .reason { display: flex; align-items: center; gap: 9px; padding: 7px 10px; border: 1px solid #e4e4e7; border-radius: 8px; font-size: 13px; color: #3f3f46; cursor: pointer; }
+  .reason input { accent-color: var(--brand); margin: 0; }
+  .reason:has(input:checked) { border-color: var(--brand); background: var(--brand-wash); color: #18181b; }
+  .reason:has(input:focus-visible) { outline: 2px solid var(--brand); outline-offset: 1px; }
+  .recorded { font-size: 12.5px; line-height: 1.5; color: var(--good); margin-top: 2px; }
+  .recorded :global(.icon) { margin-right: 4px; }
+  .recorded b { font-weight: 600; }
+  .limits { margin-top: 32px; }
+  .limits a { display: inline-flex; align-items: center; gap: 4px; font-weight: 600; text-decoration: none; white-space: nowrap; }
+  .limits a:hover { text-decoration: underline; }
+
+  @media (max-width: 1000px) {
+    .story { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .cancel { grid-template-columns: 1fr; gap: 24px; }
+  }
+  @media (max-width: 640px) {
+    .story { grid-template-columns: 1fr; }
+    .box { min-height: 0; }
+    .c-demo { grid-template-columns: 1fr; }
+    .c-demo :global(.c-arrow) { transform: rotate(90deg); justify-self: center; }
+    .cancel { margin-top: 48px; padding-top: 40px; }
+  }
+</style>
