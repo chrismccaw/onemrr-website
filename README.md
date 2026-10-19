@@ -49,7 +49,7 @@ Every product claim was checked against the app's code (October 2026). Keep thes
 
 ## Launch blockers
 
-- **Have the Privacy Policy and Terms reviewed by a lawyer**, especially liability, indemnity and governing law (California, San Diego County). Revisit both when paid plans or new sub-processors arrive.
+- **Have the Privacy Policy and Terms reviewed by a lawyer**, especially liability, indemnity and governing law (California, San Diego County). Both were updated for paid plans and Stripe on October 19, 2026 (Terms sections 1–2, Privacy providers); include the billing terms in that review, and decide whether to offer refunds (none are promised).
 
 - **Production outreach is allowlisted.** `ONEMRR_OUTREACH_ALLOWLIST` is set on the app, so retention and cancellation emails only reach listed addresses. The site describes automatic follow-ups; lift the allowlist (or say "coming soon") before promoting them.
 
