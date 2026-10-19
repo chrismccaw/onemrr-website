@@ -1,4 +1,6 @@
 ---
+import JsonLd from "../JsonLd.astro";
+import { faqPage } from "../../data/schema.mjs";
 // Every answer is checked against the app's code; see README "Claims".
 const faqs = [
   {
@@ -27,6 +29,7 @@ const faqs = [
   },
 ];
 ---
+<JsonLd data={faqPage(faqs)} />
 <section class="band" id="faq" aria-labelledby="faq-h">
   <div class="wrap grid">
     <div class="head">

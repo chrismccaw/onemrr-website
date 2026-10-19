@@ -4,6 +4,7 @@ import PageHead from "../components/PageHead.astro";
 import Icon from "../components/Icon.astro";
 import Pricing from "../components/sections/Pricing.astro";
 import { APP } from "../data/links.mjs";
+import { faqPage } from "../data/schema.mjs";
 import { pricing, plans, included, limitLabels, fmt } from "../data/plans.mjs";
 // Plans, limits and their definitions come from src/data/plans.mjs (shared with the
 // homepage). Answers here must describe what's decided and true today: paid plans aren't live,
@@ -46,7 +47,7 @@ const faqs = [
   },
 ];
 ---
-<Base title="Pricing · OneMRR" description="Launch $29 and Growth $79 a month after early access, priced by usage and never by your MRR. OneMRR is free during early access." path="/pricing">
+<Base title="OneMRR pricing · Free during early access" description="Launch $29 and Growth $79 a month after early access, priced by usage and never by your MRR. OneMRR is free during early access." path="/pricing" schema={[faqPage(faqs)]}>
   <PageHead title={pricing.headline} lede={pricing.lede} />
 
   <Pricing variant="page" />
