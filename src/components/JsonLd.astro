@@ -1,0 +1,8 @@
+---
+/** Structured data for search engines. A data block, not a script, so the CSP doesn't apply. */
+interface Props { data: object }
+const { data } = Astro.props;
+// "<" is escaped so no string in the data can close the tag.
+const json = JSON.stringify({ "@context": "https://schema.org", ...data }).replace(/</g, "\\u003c");
+---
+<script is:inline type="application/ld+json" set:html={json} />

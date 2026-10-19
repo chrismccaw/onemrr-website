@@ -4,15 +4,22 @@ import PageHead from "../components/PageHead.astro";
 import Icon from "../components/Icon.astro";
 import Pricing from "../components/sections/Pricing.astro";
 import { APP } from "../data/links.mjs";
-import { pricing, plans, included, limitLabels, fmt } from "../data/plans.mjs";
-// Plans, limits and their definitions come from src/data/plans.mjs (shared with the
-// homepage). Answers here must describe what's decided and true today: paid plans aren't live,
-// there's no payment method on file, and there are no limits during early access.
-const keys = ["connections", "events", "emails"] as const;
+import { faqPage } from "../data/schema.mjs";
+import { pricing } from "../data/plans.mjs";
+// Plans, limits, the comparison and the definitions come from src/data/plans.mjs (shared with
+// the homepage and mirrored by the app). Answers here must describe what the app does today.
 const faqs = [
   {
+    q: "Is the Free plan really free?",
+    a: "Yes, forever, with no credit card. Connect two billing sources, see unified MRR and ARR, use revenue movements, customer reporting and reconciliation, export your data, track 10,000 product events a month and run one Churn Signals rule. Your MRR figures are just as accurate as on a paid plan.",
+  },
+  {
     q: "Does OneMRR charge based on my MRR?",
-    a: "No. Plans are priced by capacity: billing connections, tracked events and retention emails. Your MRR, ARR and number of customers never change your price.",
+    a: "No. Plans are priced by capacity: billing connections, tracked events, Churn Signals rules and retention emails. Your MRR, ARR and number of customers never change your price, and no plan caps how much MRR you can track.",
+  },
+  {
+    q: "What do I get by upgrading?",
+    a: "Free shows you which customers are at risk and how much MRR is involved. Launch and Growth act on it: branded retention emails (automatic or approved by you), hosted cancellation feedback surveys, a two-way inbox for replies, unlimited rules, and more connections and events.",
   },
   {
     q: "What's a billing connection?",
@@ -29,48 +36,24 @@ const faqs = [
     a: "Emails sent to your customers by retention or cancellation workflows, whether automatically or after you approve a draft. Customer replies, your answers to them, digests, daily recaps, alerts and test emails don't count.",
   },
   {
-    q: "Can I use OneMRR with only Stripe?",
-    a: "Yes, one Stripe connection is enough. On top of Stripe's own reports you get revenue movements with the customers behind each change, reconciliation, Churn Signals with the MRR at stake, and branded follow-ups and cancellation surveys.",
-  },
-  {
     q: "What happens if I reach a limit?",
-    a: "During early access there are no limits. When paid plans launch, the app will show your usage, warn you as you get close and offer an upgrade. There are no overage charges, and your data is never deleted for going over.",
+    a: "The app shows your usage and warns you as you get close. Past a limit OneMRR stops rather than charges you: no new connection, new tracked events are refused with a clear error until the monthly reset, and retention emails are skipped and logged. Billing syncs and MRR keep working, there are no overage charges, and your data is never deleted.",
   },
   {
-    q: "Can I cancel any time?",
-    a: "During early access there's nothing to cancel. Paid plans will be billed month to month, with no annual contract.",
+    q: "Can I change plans or cancel any time?",
+    a: "Yes. Upgrades apply straight away. Downgrades and cancellations take effect at the end of the month you've paid for, then the workspace moves to Free with all its data and settings kept. There's no annual contract.",
   },
   {
-    q: "What happens after free early access?",
-    a: "OneMRR stays free until paid plans launch. We'll email workspace owners before that happens. There's no payment method on file during early access, so nothing can be charged until you choose a plan and add one.",
+    q: "I joined during early access. What changes?",
+    a: "Nothing yet. Early-access workspaces keep every feature without limits. We'll email workspace owners before that ends, and you'll only pay if you choose a plan yourself. There's no payment method on file, so nothing can be charged automatically.",
   },
 ];
 ---
-<Base title="Pricing · OneMRR" description="Launch $29 and Growth $79 a month after early access, priced by usage and never by your MRR. OneMRR is free during early access." path="/pricing">
+<Base title="OneMRR pricing · Free, Launch and Growth" description="Track recurring revenue free forever, or upgrade to Launch ($29) or Growth ($79) a month to automate retention. Priced by capacity, never by your MRR." path="/pricing" schema={[faqPage(faqs)]}>
   <PageHead title={pricing.headline} lede={pricing.lede} />
 
   <Pricing variant="page" />
 
-  <section class="band canvas tight" aria-labelledby="compare-h">
-    <div class="wrap">
-      <h2 class="h2 sm" id="compare-h">Compare plans</h2>
-      <div class="scroll" role="region" aria-labelledby="compare-h" tabindex="0">
-        <table class="compare">
-          <thead>
-            <tr><th scope="col"><span class="sr-only">Feature</span></th>{plans.map((p) => <th scope="col">{p.name}<span class="p">${p.price} / month</span></th>)}</tr>
-          </thead>
-          <tbody>
-            {keys.map((k) => (
-              <tr><th scope="row">{limitLabels[k].label}</th>{plans.map((p) => <td class="num">{fmt(p.limits[k])}</td>)}</tr>
-            ))}
-            {included.map((f) => (
-              <tr><th scope="row">{f}</th>{plans.map(() => <td><Icon name="check" size={16} class="tick" /><span class="sr-only">Included</span></td>)}</tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </section>
 
   <section class="band tight" aria-labelledby="pq-h">
     <div class="wrap faq">
@@ -91,24 +74,13 @@ const faqs = [
 
   <section class="band tight end">
     <div class="wrap cta">
-      <h2 class="h2 sm">Start free while early access lasts.</h2>
-      <a class="btn primary" href={APP.signup}>Get started <Icon name="arrow-right" class="arrow" /></a>
+      <h2 class="h2 sm">Start tracking your MRR for free.</h2>
+      <a class="btn primary" href={APP.signup}>Get started free <Icon name="arrow-right" class="arrow" /></a>
     </div>
   </section>
 </Base>
 <style>
   .h2.sm { font-size: clamp(26px, 3.2vw, 34px); }
-  .scroll { overflow-x: auto; margin-top: 28px; border: 1px solid var(--line); border-radius: 14px; background: var(--bg); max-width: 880px; }
-  .scroll:focus-visible { outline-offset: 3px; }
-  .compare { width: 100%; min-width: 520px; border-collapse: collapse; font-size: 15px; }
-  .compare th, .compare td { padding: 13px 18px; border-bottom: 1px solid var(--line); text-align: left; }
-  .compare tbody tr:last-child th, .compare tbody tr:last-child td { border-bottom: 0; }
-  .compare thead th { background: var(--canvas); font-size: 15px; font-weight: 650; vertical-align: bottom; }
-  .compare thead .p { display: block; font-size: 13px; font-weight: 500; color: var(--ink-3); margin-top: 2px; }
-  .compare tbody th { font-weight: 500; color: var(--ink-2); width: 56%; }
-  .compare td { width: 22%; color: var(--ink); }
-  .compare .num { font-weight: 600; font-variant-numeric: tabular-nums; }
-  .compare :global(.tick) { color: var(--good); }
   .faq { display: grid; grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.3fr); gap: 48px; align-items: start; }
   .side { margin-top: 10px; font-size: 15.5px; color: var(--ink-2); }
   .side a { font-weight: 600; }

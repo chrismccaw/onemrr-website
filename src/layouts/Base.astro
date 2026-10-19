@@ -3,6 +3,8 @@ import "@fontsource-variable/inter";
 import "../styles/global.css";
 import Nav from "../components/Nav.astro";
 import Footer from "../components/Footer.astro";
+import JsonLd from "../components/JsonLd.astro";
+import { organization, website } from "../data/schema.mjs";
 
 interface Props {
   title: string;
@@ -10,8 +12,10 @@ interface Props {
   path?: string;
   /** Keep the page out of search results (drafts). */
   noindex?: boolean;
+  /** Extra schema.org nodes for this page, alongside the organization and website. */
+  schema?: object[];
 }
-const { title, description, path = "/", noindex = false } = Astro.props;
+const { title, description, path = "/", noindex = false, schema = [] } = Astro.props;
 const canonical = new URL(path, Astro.site).toString();
 const og = new URL("/og.png", Astro.site).toString();
 ---
@@ -38,6 +42,7 @@ const og = new URL("/og.png", Astro.site).toString();
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={og} />
+    <JsonLd data={{ "@graph": [organization, website, ...schema] }} />
   </head>
   <body>
     <a class="skip" href="#main">Skip to content</a>

@@ -24,13 +24,13 @@ const parts = [
 <section class="hero">
   <div class="wrap">
     <div class="copy">
-      <h1>Know your revenue.<br />Keep more of it.</h1>
+      <h1><span class="eyebrow">MRR and churn analytics for Stripe, Shopify and Wix<span class="sr-only">.</span></span>Know your revenue.<br />Keep more of it.</h1>
       <p class="lede">Track MRR across Stripe, Shopify and Wix. Spot customers at risk, understand churn, and follow up automatically.</p>
       <div class="ctas">
         <a class="btn primary" href={APP.signup}>Get started <Icon name="arrow-right" class="arrow" /></a>
         <a class="btn secondary" href="#signals">Explore Churn Signals</a>
       </div>
-      <p class="fine">For SaaS founders and app developers. Free during early access · <a href="#pricing">See pricing</a></p>
+      <p class="fine">For SaaS founders and app developers. Free plan, no card needed · <a href="#pricing">See pricing</a></p>
     </div>
 
     <ol class="parts" aria-label="What OneMRR does">
@@ -103,6 +103,7 @@ const parts = [
   .hero { padding-top: 88px; overflow: hidden; }
   .copy { display: grid; gap: 22px; justify-items: start; max-width: 760px; }
   h1 { font-size: clamp(42px, 7vw, 76px); font-weight: 650; letter-spacing: -0.04em; line-height: 1.0; }
+  h1 .eyebrow { display: block; margin-bottom: 18px; line-height: 1.4; }
   .lede { font-size: clamp(18px, 1.7vw, 21px); line-height: 1.5; max-width: 46ch; color: var(--ink-2); }
   .ctas { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 4px; }
   .fine { font-size: 14px; color: var(--ink-3); margin-top: -6px; }
