@@ -1,6 +1,6 @@
 /**
  * schema.org structured data. Keep it within the README "Claims": no ratings, reviews or
- * customer counts, and the only offer is free early access until paid plans are live.
+ * customer counts, and the only offer listed is the Free plan until paid plans are live.
  */
 const SITE = "https://onemrr.dev/";
 
@@ -30,7 +30,7 @@ export const softwareApplication = {
   description:
     "MRR, ARR and churn analytics across Stripe, the Shopify App Store and the Wix App Market, with Churn Signals, retention emails and cancellation surveys.",
   publisher: { "@id": organization["@id"] },
-  offers: { "@type": "Offer", price: "0", priceCurrency: "USD", description: "Free during early access" },
+  offers: { "@type": "Offer", price: "0", priceCurrency: "USD", description: "Free plan, free forever" },
 };
 
 /** @param {{ q: string, a: string }[]} faqs */

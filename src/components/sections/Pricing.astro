@@ -1,17 +1,20 @@
 ---
 import Icon from "../Icon.astro";
 import { APP } from "../../data/links.mjs";
-import { pricing, plans, includedSummary, limitLabels, definitions } from "../../data/plans.mjs";
+import { pricing, plans, includedSummary, limitLabels, definitions, compare } from "../../data/plans.mjs";
 
 /**
- * Two plan cards from the shared config. "home" adds the section heading and a link to the
- * full page; "page" sits under /pricing's own heading. While paid plans aren't live, prices
- * read as "after early access" and every CTA is the free signup.
+ * Three plan cards and an expandable comparison, from the shared config. "home" adds the
+ * section heading and a link to the full page; "page" sits under /pricing's own heading.
+ * Free always starts at signup. Paid CTAs say "Choose Launch/Growth" once paid plans are live
+ * (signup, then billing in the app with that plan picked); until then they start free.
  */
 interface Props { variant?: "home" | "page" }
 const { variant = "home" } = Astro.props;
 const live = pricing.paidPlansLive;
-const keys = ["connections", "events", "emails"] as const;
+const keys = ["connections", "events", "rules", "emails"] as const;
+const href = (id: string) => (id === "free" || !live ? APP.signup : `${APP.signup}?plan=${id}`);
+const adds = (id: string) => (id === "free" ? "Unified MRR, exports and the full API" : "Cancellation surveys, branded emails and a two-way inbox");
 ---
 <section class:list={["band", variant === "home" ? "canvas" : "tight left"]} id="pricing" aria-labelledby="pricing-h">
   <div class="wrap">
@@ -23,32 +26,61 @@ const keys = ["connections", "events", "emails"] as const;
     ) : <h2 class="sr-only" id="pricing-h">Plans</h2>}
 
     {!live ? (
-      <p class="status"><span class="dot" aria-hidden="true"></span><span><strong>Free during early access.</strong> These prices start when paid plans launch, and you'll choose a plan before you're ever charged.</span></p>
+      <p class="status"><span class="dot" aria-hidden="true"></span><span><strong>Paid plans open soon.</strong> Start on Free today, no card needed. Workspaces from early access keep every feature until then, and nobody is charged without choosing a plan.</span></p>
     ) : null}
 
     <ul class="plans" role="list">
-      {plans.map((p, i) => (
-        <li class:list={["plan", { first: i === 0 }]}>
+      {plans.map((p) => (
+        <li class:list={["plan", { featured: p.id === "launch" }]}>
           <div class="top">
             <h3>{p.name}</h3>
             {p.badge ? <span class="badge-cap">{p.badge}</span> : null}
           </div>
           <p class="aud">{p.audience}</p>
-          <p class="price"><span class="amt">${p.price}</span><span class="per">/ month</span></p>
-          <p class="cadence">{live ? "Billed monthly. Cancel any time." : "Billed monthly, after early access"}</p>
-          <a class:list={["btn", i === 0 ? "primary" : "secondary", "cta"]} href={APP.signup}>
-            {live ? `Choose ${p.name}` : "Get started free"}
+          <p class="price"><span class="amt">${p.price}</span><span class="per">{p.price ? "/ month" : "forever"}</span></p>
+          <p class="cadence">{p.price ? (live ? "Billed monthly. Cancel any time." : "Monthly, when paid plans open") : "No credit card required"}</p>
+          <a class:list={["btn", p.id === "launch" ? "primary" : "secondary", "cta"]} href={href(p.id)}>
+            {p.id === "free" || live ? p.cta : "Start free"}
             <Icon name="arrow-right" class="arrow" />
           </a>
           <ul class="feats" role="list">
-            {keys.map((k) => <li><Icon name="check" size={15} class="tick" />{limitLabels[k].unit(p.limits[k])}</li>)}
-            <li><Icon name="check" size={15} class="tick" />Every feature included</li>
+            {keys.map((k) => (
+              <li class:list={{ off: k === "emails" && !p.limits.emails }}>
+                <Icon name={k === "emails" && !p.limits.emails ? "minus" : "check"} size={15} class="tick" />
+                {limitLabels[k].unit(p.limits[k])}
+              </li>
+            ))}
+            <li><Icon name="check" size={15} class="tick" />{adds(p.id)}</li>
           </ul>
         </li>
       ))}
     </ul>
 
-    <p class="incl"><strong>Both plans include every feature:</strong> {includedSummary}.</p>
+    <p class="incl"><strong>Every plan includes</strong> {includedSummary}. Pricing never depends on your MRR or ARR.</p>
+
+    <details class="defs" open={variant === "page"}>
+      <summary>Compare plans</summary>
+      <div class="scroll" role="region" aria-label="Plan comparison" tabindex="0">
+        <table class="compare">
+          <thead>
+            <tr><th scope="col"><span class="sr-only">Feature</span></th>{plans.map((p) => <th scope="col">{p.name}<span class="p">{p.price ? `$${p.price} / month` : "$0"}</span></th>)}</tr>
+          </thead>
+          <tbody>
+            {compare.map((row) => (
+              <tr>
+                <th scope="row">{row.label}</th>
+                {row.values.map((v) => (
+                  <td class:list={{ num: typeof v === "string" }}>
+                    {v === true ? <><Icon name="check" size={16} class="tick" /><span class="sr-only">Included</span></> : v === false ? <><span class="dash" aria-hidden="true">—</span><span class="sr-only">Not included</span></> : v}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p class="fair">*Unlimited rules are fair use, with a technical safety limit of 50 enabled rules.</p>
+    </details>
 
     <details class="defs">
       <summary>What counts toward each limit</summary>
@@ -56,7 +88,7 @@ const keys = ["connections", "events", "emails"] as const;
         {definitions.map((d) => (
           <div><dt>{d.t}</dt><dd>{d.d}</dd></div>
         ))}
-        <div><dt>Reaching a limit</dt><dd>There are no limits during early access. When paid plans launch, the app will show your usage and warn you as you get close. There are no overage charges, and your data is never deleted for going over.</dd></div>
+        <div><dt>Reaching a limit</dt><dd>The app shows your usage and warns you as you get close. Past a limit, OneMRR stops rather than charges: no new connection, new tracked events are refused with a clear error until the monthly reset, and retention emails are skipped and logged. Billing syncs and MRR never stop, there are no overage charges, and your data is never deleted.</dd></div>
       </dl>
     </details>
 
@@ -67,12 +99,12 @@ const keys = ["connections", "events", "emails"] as const;
 </section>
 <style>
   .head.center { margin-bottom: 32px; }
-  .status { display: flex; gap: 10px; align-items: baseline; justify-content: center; max-width: 720px; margin: 0 auto 32px; font-size: 15px; color: var(--ink-2); text-align: left; }
+  .status { display: flex; gap: 10px; align-items: baseline; justify-content: center; max-width: 760px; margin: 0 auto 32px; font-size: 15px; color: var(--ink-2); text-align: left; }
   .status strong { color: var(--ink); font-weight: 600; }
   .status .dot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--good); box-shadow: 0 0 0 3px var(--good-wash); transform: translateY(-1px); }
-  .plans { list-style: none; padding: 0; margin: 0 auto; max-width: 880px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+  .plans { list-style: none; padding: 0; margin: 0 auto; max-width: 1040px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
   .plan { display: grid; align-content: start; gap: 10px; padding: 28px; background: var(--bg); border: 1px solid var(--line-2); border-radius: 16px; }
-  .plan.first { border-color: var(--indigo); box-shadow: 0 0 0 1px var(--indigo), 0 16px 32px -24px rgba(15, 20, 38, 0.28); }
+  .plan.featured { border-color: var(--indigo); box-shadow: 0 0 0 1px var(--indigo), 0 16px 32px -24px rgba(15, 20, 38, 0.28); }
   .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 28px; }
   h3 { font-size: 20px; font-weight: 650; letter-spacing: -0.02em; }
   .badge-cap { font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 999px; background: var(--canvas); border: 1px solid var(--line); color: var(--ink-2); }
@@ -84,15 +116,31 @@ const keys = ["connections", "events", "emails"] as const;
   .cta { width: 100%; margin-top: 10px; }
   .feats { list-style: none; padding: 18px 0 0; margin-top: 10px; border-top: 1px solid var(--line); display: grid; gap: 11px; font-size: 15px; color: var(--ink); }
   .feats li { display: flex; align-items: center; gap: 10px; }
-  .feats :global(.tick) { color: var(--good); }
-  .incl { max-width: 880px; margin: 28px auto 0; font-size: 14.5px; line-height: 1.6; color: var(--ink-2); text-align: center; }
+  .feats li.off { color: var(--ink-3); }
+  .feats :global(.tick) { color: var(--good); flex: none; }
+  .feats li.off :global(.tick) { color: var(--ink-3); }
+  .incl { max-width: 1040px; margin: 28px auto 0; font-size: 14.5px; line-height: 1.6; color: var(--ink-2); text-align: center; }
   .incl strong { color: var(--ink); font-weight: 600; }
-  .defs { max-width: 880px; margin: 20px auto 0; border-top: 1px solid var(--line-2); border-bottom: 1px solid var(--line-2); }
+  .defs { max-width: 1040px; margin: 20px auto 0; border-top: 1px solid var(--line-2); border-bottom: 1px solid var(--line-2); }
+  .defs + .defs { margin-top: 0; border-top: 0; }
   .defs summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; gap: 16px; padding: 16px 0; font-size: 15.5px; font-weight: 600; }
   .defs summary::-webkit-details-marker { display: none; }
   .defs summary::after { content: "+"; font-weight: 400; font-size: 22px; line-height: 1; color: var(--ink-3); transition: transform 0.2s; }
   .defs[open] summary::after { transform: rotate(45deg); }
   .defs summary:focus-visible { outline-offset: 4px; }
+  .scroll { overflow-x: auto; margin-bottom: 12px; border: 1px solid var(--line); border-radius: 14px; background: var(--bg); }
+  .scroll:focus-visible { outline-offset: 3px; }
+  .compare { width: 100%; min-width: 560px; border-collapse: collapse; font-size: 15px; }
+  .compare th, .compare td { padding: 12px 18px; border-bottom: 1px solid var(--line); text-align: left; }
+  .compare tbody tr:last-child th, .compare tbody tr:last-child td { border-bottom: 0; }
+  .compare thead th { background: var(--canvas); font-size: 15px; font-weight: 650; vertical-align: bottom; }
+  .compare thead .p { display: block; font-size: 13px; font-weight: 500; color: var(--ink-3); margin-top: 2px; }
+  .compare tbody th { font-weight: 500; color: var(--ink-2); width: 46%; }
+  .compare td { width: 18%; color: var(--ink); }
+  .compare .num { font-weight: 600; font-variant-numeric: tabular-nums; }
+  .compare :global(.tick) { color: var(--good); }
+  .compare .dash { color: var(--ink-3); }
+  .fair { font-size: 13px; color: var(--ink-3); padding-bottom: 16px; }
   dl { margin: 0; padding-bottom: 8px; display: grid; gap: 0; }
   dl div { display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: 16px; padding: 14px 0; border-top: 1px solid var(--line); }
   dt { font-size: 14.5px; font-weight: 600; color: var(--ink); }
@@ -104,8 +152,8 @@ const keys = ["connections", "events", "emails"] as const;
   .left .incl { text-align: left; }
   .more a { display: inline-flex; align-items: center; gap: 5px; font-weight: 600; font-size: 15px; text-decoration: none; }
   .more a:hover { text-decoration: underline; }
-  @media (max-width: 760px) {
-    .plans { grid-template-columns: 1fr; }
+  @media (max-width: 980px) {
+    .plans { grid-template-columns: 1fr; max-width: 560px; }
     .aud { min-height: 0; }
     .plan { padding: 24px; }
     .status { justify-content: flex-start; }
