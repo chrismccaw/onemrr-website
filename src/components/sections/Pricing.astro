@@ -1,0 +1,115 @@
+---
+import Icon from "../Icon.astro";
+import { APP } from "../../data/links.mjs";
+import { pricing, plans, includedSummary, limitLabels, definitions } from "../../data/plans.mjs";
+
+/**
+ * Two plan cards from the shared config. "home" adds the section heading and a link to the
+ * full page; "page" sits under /pricing's own heading. While paid plans aren't live, prices
+ * read as "after early access" and every CTA is the free signup.
+ */
+interface Props { variant?: "home" | "page" }
+const { variant = "home" } = Astro.props;
+const live = pricing.paidPlansLive;
+const keys = ["connections", "events", "emails"] as const;
+---
+<section class:list={["band", variant === "home" ? "canvas" : "tight left"]} id="pricing" aria-labelledby="pricing-h">
+  <div class="wrap">
+    {variant === "home" ? (
+      <div class="head center">
+        <h2 class="h2" id="pricing-h">{pricing.headline}</h2>
+        <p class="lede">{pricing.lede}</p>
+      </div>
+    ) : <h2 class="sr-only" id="pricing-h">Plans</h2>}
+
+    {!live ? (
+      <p class="status"><span class="dot" aria-hidden="true"></span><span><strong>Free during early access.</strong> These prices start when paid plans launch, and you'll choose a plan before you're ever charged.</span></p>
+    ) : null}
+
+    <ul class="plans" role="list">
+      {plans.map((p, i) => (
+        <li class:list={["plan", { first: i === 0 }]}>
+          <div class="top">
+            <h3>{p.name}</h3>
+            {p.badge ? <span class="badge-cap">{p.badge}</span> : null}
+          </div>
+          <p class="aud">{p.audience}</p>
+          <p class="price"><span class="amt">${p.price}</span><span class="per">/ month</span></p>
+          <p class="cadence">{live ? "Billed monthly. Cancel any time." : "Billed monthly, after early access"}</p>
+          <a class:list={["btn", i === 0 ? "primary" : "secondary", "cta"]} href={APP.signup}>
+            {live ? `Choose ${p.name}` : "Get started free"}
+            <Icon name="arrow-right" class="arrow" />
+          </a>
+          <ul class="feats" role="list">
+            {keys.map((k) => <li><Icon name="check" size={15} class="tick" />{limitLabels[k].unit(p.limits[k])}</li>)}
+            <li><Icon name="check" size={15} class="tick" />Every feature included</li>
+          </ul>
+        </li>
+      ))}
+    </ul>
+
+    <p class="incl"><strong>Both plans include every feature:</strong> {includedSummary}.</p>
+
+    <details class="defs">
+      <summary>What counts toward each limit</summary>
+      <dl>
+        {definitions.map((d) => (
+          <div><dt>{d.t}</dt><dd>{d.d}</dd></div>
+        ))}
+        <div><dt>Reaching a limit</dt><dd>There are no limits during early access. When paid plans launch, the app will show your usage and warn you as you get close. There are no overage charges, and your data is never deleted for going over.</dd></div>
+      </dl>
+    </details>
+
+    {variant === "home" ? (
+      <p class="more"><a href="/pricing">Pricing details and questions <Icon name="arrow-right" size={14} /></a></p>
+    ) : null}
+  </div>
+</section>
+<style>
+  .head.center { margin-bottom: 32px; }
+  .status { display: flex; gap: 10px; align-items: baseline; justify-content: center; max-width: 720px; margin: 0 auto 32px; font-size: 15px; color: var(--ink-2); text-align: left; }
+  .status strong { color: var(--ink); font-weight: 600; }
+  .status .dot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--good); box-shadow: 0 0 0 3px var(--good-wash); transform: translateY(-1px); }
+  .plans { list-style: none; padding: 0; margin: 0 auto; max-width: 880px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+  .plan { display: grid; align-content: start; gap: 10px; padding: 28px; background: var(--bg); border: 1px solid var(--line-2); border-radius: 16px; }
+  .plan.first { border-color: var(--indigo); box-shadow: 0 0 0 1px var(--indigo), 0 16px 32px -24px rgba(15, 20, 38, 0.28); }
+  .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 28px; }
+  h3 { font-size: 20px; font-weight: 650; letter-spacing: -0.02em; }
+  .badge-cap { font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 999px; background: var(--canvas); border: 1px solid var(--line); color: var(--ink-2); }
+  .aud { font-size: 15px; color: var(--ink-2); min-height: 3em; }
+  .price { display: flex; align-items: baseline; gap: 6px; margin-top: 6px; }
+  .amt { font-size: 48px; font-weight: 650; letter-spacing: -0.045em; line-height: 1; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .per { font-size: 16px; color: var(--ink-3); }
+  .cadence { font-size: 13.5px; color: var(--ink-3); }
+  .cta { width: 100%; margin-top: 10px; }
+  .feats { list-style: none; padding: 18px 0 0; margin-top: 10px; border-top: 1px solid var(--line); display: grid; gap: 11px; font-size: 15px; color: var(--ink); }
+  .feats li { display: flex; align-items: center; gap: 10px; }
+  .feats :global(.tick) { color: var(--good); }
+  .incl { max-width: 880px; margin: 28px auto 0; font-size: 14.5px; line-height: 1.6; color: var(--ink-2); text-align: center; }
+  .incl strong { color: var(--ink); font-weight: 600; }
+  .defs { max-width: 880px; margin: 20px auto 0; border-top: 1px solid var(--line-2); border-bottom: 1px solid var(--line-2); }
+  .defs summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; gap: 16px; padding: 16px 0; font-size: 15.5px; font-weight: 600; }
+  .defs summary::-webkit-details-marker { display: none; }
+  .defs summary::after { content: "+"; font-weight: 400; font-size: 22px; line-height: 1; color: var(--ink-3); transition: transform 0.2s; }
+  .defs[open] summary::after { transform: rotate(45deg); }
+  .defs summary:focus-visible { outline-offset: 4px; }
+  dl { margin: 0; padding-bottom: 8px; display: grid; gap: 0; }
+  dl div { display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: 16px; padding: 14px 0; border-top: 1px solid var(--line); }
+  dt { font-size: 14.5px; font-weight: 600; color: var(--ink); }
+  dd { margin: 0; font-size: 14.5px; color: var(--ink-2); max-width: 62ch; }
+  .more { text-align: center; margin-top: 24px; }
+  /* On /pricing everything lines up with the page heading instead of centering. */
+  .left .status { justify-content: flex-start; margin-left: 0; }
+  .left .plans, .left .incl, .left .defs { margin-left: 0; }
+  .left .incl { text-align: left; }
+  .more a { display: inline-flex; align-items: center; gap: 5px; font-weight: 600; font-size: 15px; text-decoration: none; }
+  .more a:hover { text-decoration: underline; }
+  @media (max-width: 760px) {
+    .plans { grid-template-columns: 1fr; }
+    .aud { min-height: 0; }
+    .plan { padding: 24px; }
+    .status { justify-content: flex-start; }
+    .incl { text-align: left; }
+    dl div { grid-template-columns: 1fr; gap: 4px; }
+  }
+</style>

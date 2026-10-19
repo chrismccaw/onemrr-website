@@ -2,22 +2,22 @@
 import Logo from "./Logo.astro";
 import Icon from "./Icon.astro";
 import { APP } from "../data/links.mjs";
-// Feature and reference pages. The homepage demos stay one click away through the hero's
-// Understand / Detect / Act links.
-const links = [
-  { href: "/churn-signals", label: "Churn Signals" },
-  { href: "/integrations", label: "Integrations" },
-  { href: "/pricing", label: "Pricing" },
-  { href: "/docs", label: "Docs" },
-];
+// Revenue and Follow-up jump to the homepage demos; Pricing goes to the homepage section when
+// you're already there, otherwise to /pricing. Integrations and Docs live in the footer.
 const here = Astro.url.pathname.replace(/\/$/, "") || "/";
+const links = [
+  { href: "/#platforms", label: "Revenue" },
+  { href: "/churn-signals", label: "Churn Signals" },
+  { href: "/#retention", label: "Follow-up" },
+  { href: here === "/" ? "#pricing" : "/pricing", label: "Pricing", page: "/pricing" },
+];
 ---
 <header class="nav" data-nav>
   <div class="wrap row">
     <a href="/" class="home" aria-label="OneMRR home"><Logo /></a>
     <nav aria-label="Main" class="links">
       <ul>
-        {links.map((l) => <li><a href={l.href} aria-current={here === l.href ? "page" : undefined}>{l.label}</a></li>)}
+        {links.map((l) => <li><a href={l.href} aria-current={here === (l.page ?? l.href) ? "page" : undefined}>{l.label}</a></li>)}
       </ul>
     </nav>
     <div class="actions">

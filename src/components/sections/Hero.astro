@@ -30,7 +30,7 @@ const parts = [
         <a class="btn primary" href={APP.signup}>Get started <Icon name="arrow-right" class="arrow" /></a>
         <a class="btn secondary" href="#signals">Explore Churn Signals</a>
       </div>
-      <p class="fine">For SaaS founders and app developers. Free during early access, no card required.</p>
+      <p class="fine">For SaaS founders and app developers. Free during early access · <a href="#pricing">See pricing</a></p>
     </div>
 
     <ol class="parts" aria-label="What OneMRR does">
@@ -106,6 +106,8 @@ const parts = [
   .lede { font-size: clamp(18px, 1.7vw, 21px); line-height: 1.5; max-width: 46ch; color: var(--ink-2); }
   .ctas { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 4px; }
   .fine { font-size: 14px; color: var(--ink-3); margin-top: -6px; }
+  .fine a { color: var(--ink-2); font-weight: 600; }
+  .fine a:hover { color: var(--indigo); }
 
   .parts { list-style: none; padding: 0; margin-top: 56px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--line); }
   .parts a { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; padding: 18px 24px 4px 0; text-decoration: none; color: var(--ink); }
