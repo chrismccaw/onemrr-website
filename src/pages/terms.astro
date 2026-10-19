@@ -1,0 +1,65 @@
+---
+import Base from "../layouts/Base.astro";
+import PageHead from "../components/PageHead.astro";
+// Plain-English terms for free early access, matched to how OneMRR works: read-only
+// billing connections, customer-owned data, emails sent on the customer's behalf with
+// unsubscribe and suppression, no payment details collected. Revisit sections 1 and 9 when
+// paid plans launch, and have liability, indemnity and governing law reviewed by a lawyer.
+const company = "Architect Spot LLC";
+const email = "hello@onemrr.dev";
+---
+<Base title="Terms of Service · OneMRR" description="The terms for using OneMRR, in plain English." path="/terms">
+  <PageHead title="Terms of Service" lede="The agreement between you and OneMRR, in plain English." />
+  <section class="band tight legal">
+    <div class="wrap"><div class="prose">
+      <p class="meta">Effective date: October 18, 2026</p>
+
+      <p>These terms are an agreement between you and {company} ("OneMRR", "we", "us") for using the OneMRR app and website. If you use OneMRR for a company, you're agreeing for that company and confirming you're allowed to. Our <a href="/privacy">Privacy Policy</a> explains how we handle personal information.</p>
+
+      <h2>1. Early access</h2>
+      <p>OneMRR is in early access and free to use. Features may change, be limited or be removed as the product develops. We don't collect payment details during early access. If we introduce paid plans, we'll tell you before they apply to your workspace, and you'll only be charged if you choose a paid plan.</p>
+
+      <h2>2. Your account</h2>
+      <p>Give accurate sign-up details and keep your password safe. You're responsible for what happens in your workspace, including what the members you invite do there. You must be at least 16 and use OneMRR for business purposes.</p>
+
+      <h2>3. Your data stays yours</h2>
+      <p>You own the data you bring to OneMRR: your billing data, your customers' details, activity data, and the content of your emails and surveys. You give us permission to store and process it only to provide OneMRR to you, as described in our Privacy Policy. We don't sell it or use it for anything else.</p>
+
+      <h2>4. Connecting billing platforms</h2>
+      <p>Only connect accounts you're authorized to access. OneMRR reads from the platforms you connect and doesn't change anything in them. Those platforms are run by other companies under their own terms, and we're not responsible for their availability or for the accuracy of the data they provide. Some figures, such as Wix MRR, are estimates, and the app labels them as such.</p>
+
+      <h2>5. Emails to your customers</h2>
+      <p>OneMRR can send retention and cancellation emails to your customers when you turn this on. Those emails are sent on your behalf, so you're responsible for them. In particular:</p>
+      <ul>
+        <li>You must have the right to email the people you send to, and you must follow the laws that apply to you and to them, such as CAN-SPAM, GDPR and similar rules.</li>
+        <li>You're responsible for the content of your emails and surveys, and they must be truthful.</li>
+        <li>OneMRR adds an unsubscribe link and stops emailing addresses that unsubscribe, bounce or complain. Don't try to work around this.</li>
+      </ul>
+      <p>We may pause sending for a workspace if its emails cause complaints or harm deliverability for others.</p>
+
+      <h2>6. Acceptable use</h2>
+      <p>Don't use OneMRR to break the law, to send spam, to access data you're not authorized to access, to interfere with or overload the service, to probe it for vulnerabilities without our permission, or to resell it without our agreement.</p>
+
+      <h2>7. Availability</h2>
+      <p>We work hard to keep OneMRR running and your numbers accurate, but we provide it "as is" and "as available", without warranties of any kind, to the extent the law allows. Don't rely on OneMRR as your only record for accounting, tax or investor reporting.</p>
+
+      <h2>8. Ending your use</h2>
+      <p>You can stop using OneMRR at any time, and ask us to delete your workspace by emailing <a href={`mailto:${email}`}>{email}</a>. We may suspend or close a workspace that breaks these terms. Where possible we'll warn you first and give you a chance to export your data. We may also end early access or the service altogether. If so, we'll give you at least 30 days' notice so you can export your data.</p>
+
+      <h2>9. Liability</h2>
+      <p>To the extent the law allows, OneMRR isn't liable for indirect or consequential losses, such as lost profits, revenue or data, and our total liability under these terms is limited to the greater of the amount you paid us in the 12 months before the claim or US$100. Some places don't allow these limits, so they may not apply to you.</p>
+
+      <h2>10. Your responsibility to us</h2>
+      <p>If someone makes a claim against us because of data you connected without permission, or because of emails or surveys sent from your workspace, you'll cover the reasonable costs of that claim.</p>
+
+      <h2>11. Changes to these terms</h2>
+      <p>If we change these terms in a way that matters, we'll update this page and email workspace owners before the change takes effect. If you keep using OneMRR after that, the new terms apply.</p>
+
+      <h2>12. Governing law</h2>
+      <p>These terms are governed by the laws of the State of California, without regard to its conflict-of-laws rules, and disputes will be handled in the state and federal courts located in San Diego County, California.</p>
+
+      <h2>13. Contact</h2>
+      <p>{company}, 1150 Garden View Rd, Unit 230056, Encinitas, CA 92024, USA. Email: <a href={`mailto:${email}`}>{email}</a>.</p>
+    </div></div>
+  </section>
+</Base>

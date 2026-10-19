@@ -8,8 +8,10 @@ interface Props {
   title: string;
   description: string;
   path?: string;
+  /** Keep the page out of search results (drafts). */
+  noindex?: boolean;
 }
-const { title, description, path = "/" } = Astro.props;
+const { title, description, path = "/", noindex = false } = Astro.props;
 const canonical = new URL(path, Astro.site).toString();
 const og = new URL("/og.png", Astro.site).toString();
 ---
@@ -21,6 +23,7 @@ const og = new URL("/og.png", Astro.site).toString();
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    {noindex ? <meta name="robots" content="noindex" /> : null}
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <meta name="theme-color" content="#ffffff" />
     <meta property="og:type" content="website" />

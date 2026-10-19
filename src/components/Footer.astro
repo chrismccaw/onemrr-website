@@ -1,8 +1,6 @@
 ---
 import Logo from "./Logo.astro";
 import { APP, SDK } from "../data/links.mjs";
-// Privacy Policy, Terms of Service and a contact address don't exist yet; they're launch
-// blockers (see README) and get links here once approved.
 ---
 <footer class="foot">
   <div class="wrap grid">
@@ -38,6 +36,7 @@ import { APP, SDK } from "../data/links.mjs";
   </div>
   <div class="wrap base">
     <span>© 2026 OneMRR</span>
+    <span class="legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="mailto:hello@onemrr.dev">hello@onemrr.dev</a></span>
     <span>This site sets no cookies and runs no trackers.</span>
   </div>
 </footer>
@@ -49,6 +48,9 @@ import { APP, SDK } from "../data/links.mjs";
   ul { list-style: none; padding: 0; display: grid; gap: 2px; }
   a { display: inline-block; padding-block: 6px; color: var(--ink-2); text-decoration: none; }
   a:hover { color: var(--ink); }
+  .legal { display: inline-flex; gap: 18px; }
+  .legal a { padding-block: 0; color: var(--ink-3); }
+  .legal a:hover { color: var(--ink); }
   .base { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 24px; margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--ink-3); font-size: 13px; }
   @media (max-width: 760px) { .grid { grid-template-columns: 1fr 1fr; } .brand { grid-column: 1 / -1; } }
 </style>

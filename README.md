@@ -49,8 +49,8 @@ Every product claim was checked against the app's code (October 2026). Keep thes
 
 ## Launch blockers
 
-- **Privacy Policy and Terms of Service** don't exist. Add them, then link them in the footer.
-- **No public contact or security address.** The footer and /security need one.
+- **Have the Privacy Policy and Terms reviewed by a lawyer**, especially liability, indemnity and governing law (California, San Diego County). Revisit both when paid plans or new sub-processors arrive.
+
 - **Production outreach is allowlisted.** `ONEMRR_OUTREACH_ALLOWLIST` is set on the app, so retention and cancellation emails only reach listed addresses. The site describes automatic follow-ups; lift the allowlist (or say "coming soon") before promoting them.
 
 ## Infrastructure

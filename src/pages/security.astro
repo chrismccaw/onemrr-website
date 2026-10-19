@@ -13,7 +13,7 @@ import PageHead from "../components/PageHead.astro";
   <PageHead title="Security and data handling" lede="You're trusting OneMRR with billing data and, if you choose, with emailing your customers. Here's exactly how that's handled." />
 
   <section class="band tight">
-    <div class="wrap prose">
+    <div class="wrap"><div class="prose">
       <h2>Billing connections are read-only</h2>
       <p>OneMRR reads subscriptions, invoices and customers. It never changes anything in your billing platforms. For Stripe you create a <strong>restricted key with read access only</strong>, and every set of credentials is checked with a read-only call before it's saved.</p>
 
@@ -36,6 +36,9 @@ import PageHead from "../components/PageHead.astro";
 
       <h2>Where it runs</h2>
       <p>The managed service runs on AWS in the United States (us-west-2). The Postgres database sits in private subnets with no route to the internet. Sign-in is by email and password or Google.</p>
-    </div>
+
+      <h2>Reporting a security issue</h2>
+      <p>Email <a href="mailto:hello@onemrr.dev">hello@onemrr.dev</a>. Please include enough detail for us to reproduce the issue, and give us a chance to fix it before sharing it publicly.</p>
+    </div></div>
   </section>
 </Base>

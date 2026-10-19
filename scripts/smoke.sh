@@ -9,7 +9,7 @@ code=$(curl -s -o /tmp/home.html -w '%{http_code}' "$URL/")
 [ "$code" = 200 ] || fail "$URL/ returned $code"
 grep -q "Know your revenue" /tmp/home.html || fail "homepage content missing"
 
-for page in pricing churn-signals integrations security docs sitemap.xml; do
+for page in pricing churn-signals integrations security docs privacy terms sitemap.xml; do
   code=$(curl -s -o /dev/null -w '%{http_code}' "$URL/$page")
   [ "$code" = 200 ] || fail "$URL/$page returned $code"
 done
