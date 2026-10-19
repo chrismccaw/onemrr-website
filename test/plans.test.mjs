@@ -26,7 +26,13 @@ test("paid plans add retention automation, Free doesn't sell it", () => {
   assert.ok(Object.values(plans[0].features).every((v) => v === false));
   assert.ok(plans.slice(1).every((p) => Object.values(p.features).every(Boolean)));
   assert.equal(plans[0].limits.emails, 0);
-  assert.equal(compare.length, 7 + included.length);
+  assert.deepEqual(compare.map((g) => g.group), ["Capacity", "Retention automation", "In every plan"]);
+  assert.equal(compare.at(-1).rows.length, included.length);
+});
+
+test("each card leads with what it's for and what it adds, not raw limits", () => {
+  for (const p of plans) assert.ok(p.outcome && p.benefits?.length >= 1, p.id);
+  assert.ok(!plans.some((p) => p.badge), "no capacity badge competing with the featured plan");
 });
 
 test("nothing is priced on revenue", () => {
@@ -38,6 +44,17 @@ test("every limit has a plain definition", () => {
   for (const k of Object.keys(limitLabels)) assert.ok(definitions.find((d) => d.k === k), k);
 });
 
-test("paid CTAs stay on free signup until billing is live", () => {
-  assert.equal(pricing.paidPlansLive, false);
+test("paid plans are live, and the headline is kept honest", () => {
+  assert.equal(pricing.paidPlansLive, true);
+  assert.match(pricing.promise, /MRR never changes your price/);
+  assert.ok(plans.every((p) => p.outcome && p.outcome.length < 60), "each card leads with a short outcome");
+});
+
+test("the limit policy matches the app: nothing queued, nothing deleted, no overages", async () => {
+  const { atLimit, atLimitShort, earlyAccess } = await import("../src/data/plans.mjs");
+  const text = [...atLimit.keeps, ...atLimit.stops].join(" ").toLowerCase();
+  for (const s of ["billing syncs", "aren't queued", "not sent later", "no overage charges", "nothing is deleted"]) assert.ok(text.includes(s), s);
+  for (const s of ["refused", "skipped", "not queued or sent later", "1st", "no overage charges"]) assert.ok(atLimitShort.includes(s), s);
+  assert.ok(!/\bpause/i.test(atLimitShort), "never say pause: nothing resumes or catches up");
+  assert.match(earlyAccess, /at least 30 days/);
 });

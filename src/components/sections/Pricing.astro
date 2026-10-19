@@ -1,12 +1,14 @@
 ---
 import Icon from "../Icon.astro";
 import { APP } from "../../data/links.mjs";
-import { pricing, plans, includedSummary, limitLabels, definitions, compare } from "../../data/plans.mjs";
+import { pricing, plans, includedSummary, limitLabels, definitions, compare, atLimit, earlyAccess } from "../../data/plans.mjs";
 
 /**
- * Three plan cards and an expandable comparison, from the shared config. "home" adds the
- * section heading and a link to the full page; "page" sits under /pricing's own heading.
- * Free always starts at signup. Paid CTAs say "Choose Launch/Growth" once paid plans are live
+ * Three plan cards from the shared config: what each plan is for and what it adds first, its
+ * limits underneath. "home" adds the section heading and a link to /pricing (the homepage FAQ
+ * carries the one-line limit policy). "page" adds the early-access note, the grouped
+ * comparison, the definitions and exactly what happens at a limit.
+ * Free starts at signup. Paid CTAs say "Choose Launch/Growth" once paid plans are live
  * (signup, then billing in the app with that plan picked); until then they start free.
  */
 interface Props { variant?: "home" | "page" }
@@ -14,7 +16,6 @@ const { variant = "home" } = Astro.props;
 const live = pricing.paidPlansLive;
 const keys = ["connections", "events", "rules", "emails"] as const;
 const href = (id: string) => (id === "free" || !live ? APP.signup : `${APP.signup}?plan=${id}`);
-const adds = (id: string) => (id === "free" ? "Unified MRR, exports and the full API" : "Cancellation surveys, branded emails and a two-way inbox");
 ---
 <section class:list={["band", variant === "home" ? "canvas" : "tight left"]} id="pricing" aria-labelledby="pricing-h">
   <div class="wrap">
@@ -22,8 +23,14 @@ const adds = (id: string) => (id === "free" ? "Unified MRR, exports and the full
       <div class="head center">
         <h2 class="h2" id="pricing-h">{pricing.headline}</h2>
         <p class="lede">{pricing.lede}</p>
+        <p class="promise">{pricing.promise}</p>
       </div>
-    ) : <h2 class="sr-only" id="pricing-h">Plans</h2>}
+    ) : (
+      <>
+        <h2 class="sr-only" id="pricing-h">Plans</h2>
+        <p class="promise page">{pricing.promise}</p>
+      </>
+    )}
 
     {!live ? (
       <p class="status"><span class="dot" aria-hidden="true"></span><span><strong>Paid plans open soon.</strong> Start on Free today, no card needed. Workspaces from early access keep every feature until then, and nobody is charged without choosing a plan.</span></p>
@@ -32,132 +39,158 @@ const adds = (id: string) => (id === "free" ? "Unified MRR, exports and the full
     <ul class="plans" role="list">
       {plans.map((p) => (
         <li class:list={["plan", { featured: p.id === "launch" }]}>
-          <div class="top">
-            <h3>{p.name}</h3>
-            {p.badge ? <span class="badge-cap">{p.badge}</span> : null}
-          </div>
-          <p class="aud">{p.audience}</p>
+          <h3>{p.name}</h3>
+          <p class="aud">{p.outcome}</p>
           <p class="price"><span class="amt">${p.price}</span><span class="per">{p.price ? "/ month" : "forever"}</span></p>
-          <p class="cadence">{p.price ? (live ? "Billed monthly. Cancel any time." : "Monthly, when paid plans open") : "No credit card required"}</p>
+          <p class="cadence">{p.price ? (live ? "Billed monthly. Change plans or cancel any time." : "Monthly, when paid plans open") : "No credit card required"}</p>
           <a class:list={["btn", p.id === "launch" ? "primary" : "secondary", "cta"]} href={href(p.id)}>
             {p.id === "free" || live ? p.cta : "Start free"}
             <Icon name="arrow-right" class="arrow" />
           </a>
           <ul class="feats" role="list">
-            {keys.map((k) => (
-              <li class:list={{ off: k === "emails" && !p.limits.emails }}>
-                <Icon name={k === "emails" && !p.limits.emails ? "minus" : "check"} size={15} class="tick" />
-                {limitLabels[k].unit(p.limits[k])}
-              </li>
-            ))}
-            <li><Icon name="check" size={15} class="tick" />{adds(p.id)}</li>
+            {p.benefits.map((b) => <li><Icon name="check" size={15} class="tick" />{b}</li>)}
+          </ul>
+          <ul class="caps" role="list" aria-label={`${p.name} limits`}>
+            {keys.map((k) => <li class:list={{ off: k === "emails" && !p.limits.emails }}>{limitLabels[k].unit(p.limits[k])}</li>)}
           </ul>
         </li>
       ))}
     </ul>
 
-    <p class="incl"><strong>Every plan includes</strong> {includedSummary}. Pricing never depends on your MRR or ARR.</p>
+    <p class="incl"><strong>Every plan includes</strong> {includedSummary}</p>
 
-    <details class="defs" open={variant === "page"}>
-      <summary>Compare plans</summary>
-      <div class="scroll" role="region" aria-label="Plan comparison" tabindex="0">
-        <table class="compare">
-          <thead>
-            <tr><th scope="col"><span class="sr-only">Feature</span></th>{plans.map((p) => <th scope="col">{p.name}<span class="p">{p.price ? `$${p.price} / month` : "$0"}</span></th>)}</tr>
-          </thead>
-          <tbody>
-            {compare.map((row) => (
-              <tr>
-                <th scope="row">{row.label}</th>
-                {row.values.map((v) => (
-                  <td class:list={{ num: typeof v === "string" }}>
-                    {v === true ? <><Icon name="check" size={16} class="tick" /><span class="sr-only">Included</span></> : v === false ? <><span class="dash" aria-hidden="true">—</span><span class="sr-only">Not included</span></> : v}
-                  </td>
-                ))}
-              </tr>
+    {variant === "page" ? (
+      <>
+        <p class="ea"><strong>Joined during early access?</strong> {earlyAccess}</p>
+
+        <div class="block">
+          <h3 class="block-h">Compare plans</h3>
+          <div class="scroll" role="region" aria-label="Plan comparison" tabindex="0">
+            <table class="compare">
+              <thead>
+                <tr><th scope="col"><span class="sr-only">Feature</span></th>{plans.map((p) => <th scope="col">{p.name}<span class="p">{p.price ? `$${p.price} / month` : "$0"}</span></th>)}</tr>
+              </thead>
+              {compare.map((g) => (
+                <tbody>
+                  <tr class="grp"><th scope="colgroup" colspan={plans.length + 1}>{g.group}</th></tr>
+                  {g.rows.map((row) => (
+                    <tr>
+                      <th scope="row">{row.label}</th>
+                      {row.values.map((v) => (
+                        <td class:list={{ num: typeof v === "string" }}>
+                          {v === true ? <><Icon name="check" size={16} class="tick" /><span class="sr-only">Included</span></> : v === false ? <><span class="dash" aria-hidden="true">—</span><span class="sr-only">Not included</span></> : v}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              ))}
+            </table>
+          </div>
+          <p class="fair">*Unlimited rules are fair use, with a technical safety limit of 50 enabled rules.</p>
+        </div>
+
+        <div class="block limits" id="limits">
+          <h3 class="block-h">When you reach a limit</h3>
+          <div class="limit-groups">
+            <div>
+              <h4>Keeps working</h4>
+              <ul role="list">{atLimit.keeps.map((x) => <li><Icon name="check" size={15} class="tick" />{x}</li>)}</ul>
+            </div>
+            <div>
+              <h4>Stops until the 1st of the month (UTC) or an upgrade</h4>
+              <ul role="list">{atLimit.stops.map((x) => <li><Icon name="minus" size={15} class="stop" />{x}</li>)}</ul>
+            </div>
+          </div>
+        </div>
+
+        <details class="defs">
+          <summary>What counts toward each limit</summary>
+          <dl>
+            {definitions.map((d) => (
+              <div><dt>{d.t}</dt><dd>{d.d}</dd></div>
             ))}
-          </tbody>
-        </table>
-      </div>
-      <p class="fair">*Unlimited rules are fair use, with a technical safety limit of 50 enabled rules.</p>
-    </details>
-
-    <details class="defs">
-      <summary>What counts toward each limit</summary>
-      <dl>
-        {definitions.map((d) => (
-          <div><dt>{d.t}</dt><dd>{d.d}</dd></div>
-        ))}
-        <div><dt>Reaching a limit</dt><dd>The app shows your usage and warns you as you get close. Past a limit, OneMRR stops rather than charges: no new connection, new tracked events are refused with a clear error until the monthly reset, and retention emails are skipped and logged. Billing syncs and MRR never stop, there are no overage charges, and your data is never deleted.</dd></div>
-      </dl>
-    </details>
-
-    {variant === "home" ? (
-      <p class="more"><a href="/pricing">Pricing details and questions <Icon name="arrow-right" size={14} /></a></p>
-    ) : null}
+          </dl>
+        </details>
+      </>
+    ) : (
+      <p class="more"><a href="/pricing">Compare plans and what happens at a limit <Icon name="arrow-right" size={14} /></a></p>
+    )}
   </div>
 </section>
 <style>
   .head.center { margin-bottom: 32px; }
+  .promise { max-width: 62ch; margin: 14px auto 0; font-size: 15px; color: var(--ink-2); }
+  .promise.page { margin: 0 0 28px; }
   .status { display: flex; gap: 10px; align-items: baseline; justify-content: center; max-width: 760px; margin: 0 auto 32px; font-size: 15px; color: var(--ink-2); text-align: left; }
   .status strong { color: var(--ink); font-weight: 600; }
   .status .dot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--good); box-shadow: 0 0 0 3px var(--good-wash); transform: translateY(-1px); }
   .plans { list-style: none; padding: 0; margin: 0 auto; max-width: 1040px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
   .plan { display: grid; align-content: start; gap: 10px; padding: 28px; background: var(--bg); border: 1px solid var(--line-2); border-radius: 16px; }
   .plan.featured { border-color: var(--indigo); box-shadow: 0 0 0 1px var(--indigo), 0 16px 32px -24px rgba(15, 20, 38, 0.28); }
-  .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 28px; }
   h3 { font-size: 20px; font-weight: 650; letter-spacing: -0.02em; }
-  .badge-cap { font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 999px; background: var(--canvas); border: 1px solid var(--line); color: var(--ink-2); }
   .aud { font-size: 15px; color: var(--ink-2); min-height: 3em; }
   .price { display: flex; align-items: baseline; gap: 6px; margin-top: 6px; }
   .amt { font-size: 48px; font-weight: 650; letter-spacing: -0.045em; line-height: 1; color: var(--ink); font-variant-numeric: tabular-nums; }
   .per { font-size: 16px; color: var(--ink-3); }
   .cadence { font-size: 13.5px; color: var(--ink-3); }
   .cta { width: 100%; margin-top: 10px; }
-  .feats { list-style: none; padding: 18px 0 0; margin-top: 10px; border-top: 1px solid var(--line); display: grid; gap: 11px; font-size: 15px; color: var(--ink); }
-  .feats li { display: flex; align-items: center; gap: 10px; }
-  .feats li.off { color: var(--ink-3); }
-  .feats :global(.tick) { color: var(--good); flex: none; }
-  .feats li.off :global(.tick) { color: var(--ink-3); }
-  .incl { max-width: 1040px; margin: 28px auto 0; font-size: 14.5px; line-height: 1.6; color: var(--ink-2); text-align: center; }
-  .incl strong { color: var(--ink); font-weight: 600; }
-  .defs { max-width: 1040px; margin: 20px auto 0; border-top: 1px solid var(--line-2); border-bottom: 1px solid var(--line-2); }
-  .defs + .defs { margin-top: 0; border-top: 0; }
-  .defs summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; gap: 16px; padding: 16px 0; font-size: 15.5px; font-weight: 600; }
-  .defs summary::-webkit-details-marker { display: none; }
-  .defs summary::after { content: "+"; font-weight: 400; font-size: 22px; line-height: 1; color: var(--ink-3); transition: transform 0.2s; }
-  .defs[open] summary::after { transform: rotate(45deg); }
-  .defs summary:focus-visible { outline-offset: 4px; }
-  .scroll { overflow-x: auto; margin-bottom: 12px; border: 1px solid var(--line); border-radius: 14px; background: var(--bg); }
+  .feats { list-style: none; padding: 18px 0 0; margin-top: 10px; border-top: 1px solid var(--line); display: grid; gap: 10px; font-size: 15px; font-weight: 500; color: var(--ink); }
+  .feats li { display: flex; align-items: baseline; gap: 10px; }
+  .feats :global(.tick) { color: var(--good); flex: none; transform: translateY(2px); }
+  .caps { list-style: none; padding: 0; margin: 4px 0 0; display: grid; gap: 6px; font-size: 14px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+  .caps li::before { content: ""; display: inline-block; width: 4px; height: 4px; border-radius: 50%; background: var(--ink-3); margin: 0 10px 2px 5px; vertical-align: middle; }
+  .caps li.off { color: var(--ink-3); }
+  .incl { max-width: 72ch; margin: 28px auto 0; font-size: 14.5px; line-height: 1.6; color: var(--ink-2); text-align: center; }
+  .incl strong, .ea strong { color: var(--ink); font-weight: 600; }
+  .ea { max-width: 72ch; margin: 14px 0 0; font-size: 14.5px; line-height: 1.6; color: var(--ink-2); }
+  .block { max-width: 1040px; margin-top: 40px; }
+  .block-h { font-size: 19px; font-weight: 650; letter-spacing: -0.015em; margin-bottom: 14px; }
+  .scroll { position: relative; max-width: 100%; overflow-x: auto; border: 1px solid var(--line); border-radius: 14px; background: var(--bg); }
   .scroll:focus-visible { outline-offset: 3px; }
   .compare { width: 100%; min-width: 560px; border-collapse: collapse; font-size: 15px; }
   .compare th, .compare td { padding: 12px 18px; border-bottom: 1px solid var(--line); text-align: left; }
-  .compare tbody tr:last-child th, .compare tbody tr:last-child td { border-bottom: 0; }
+  .compare tbody:last-child tr:last-child th, .compare tbody:last-child tr:last-child td { border-bottom: 0; }
   .compare thead th { background: var(--canvas); font-size: 15px; font-weight: 650; vertical-align: bottom; }
   .compare thead .p { display: block; font-size: 13px; font-weight: 500; color: var(--ink-3); margin-top: 2px; }
+  .compare .grp th { padding-top: 18px; font-size: 12.5px; font-weight: 650; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.04em; }
   .compare tbody th { font-weight: 500; color: var(--ink-2); width: 46%; }
   .compare td { width: 18%; color: var(--ink); }
   .compare .num { font-weight: 600; font-variant-numeric: tabular-nums; }
   .compare :global(.tick) { color: var(--good); }
   .compare .dash { color: var(--ink-3); }
-  .fair { font-size: 13px; color: var(--ink-3); padding-bottom: 16px; }
+  .fair { font-size: 13px; color: var(--ink-3); margin-top: 10px; }
+  .limits { scroll-margin-top: 96px; }
+  .limit-groups { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px; }
+  .limit-groups h4 { font-size: 15px; font-weight: 650; margin-bottom: 10px; }
+  .limit-groups ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+  .limit-groups li { display: flex; gap: 10px; align-items: baseline; font-size: 15px; line-height: 1.55; color: var(--ink-2); max-width: 62ch; }
+  .limit-groups :global(.tick) { color: var(--good); flex: none; transform: translateY(2px); }
+  .limit-groups :global(.stop) { color: var(--ink-3); flex: none; transform: translateY(2px); }
+  .defs { max-width: 1040px; margin: 36px 0 0; border-top: 1px solid var(--line-2); border-bottom: 1px solid var(--line-2); }
+  .defs summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; gap: 16px; padding: 16px 0; font-size: 15.5px; font-weight: 600; }
+  .defs summary::-webkit-details-marker { display: none; }
+  .defs summary::after { content: "+"; font-weight: 400; font-size: 22px; line-height: 1; color: var(--ink-3); transition: transform 0.2s; }
+  .defs[open] summary::after { transform: rotate(45deg); }
+  .defs summary:focus-visible { outline-offset: 4px; }
   dl { margin: 0; padding-bottom: 8px; display: grid; gap: 0; }
   dl div { display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: 16px; padding: 14px 0; border-top: 1px solid var(--line); }
   dt { font-size: 14.5px; font-weight: 600; color: var(--ink); }
   dd { margin: 0; font-size: 14.5px; color: var(--ink-2); max-width: 62ch; }
-  .more { text-align: center; margin-top: 24px; }
+  .more { text-align: center; margin-top: 16px; }
+  .more a { display: inline-flex; align-items: center; gap: 5px; min-height: 44px; padding: 0 6px; font-weight: 600; font-size: 15px; text-decoration: none; }
+  .more a:hover { text-decoration: underline; }
   /* On /pricing everything lines up with the page heading instead of centering. */
   .left .status { justify-content: flex-start; margin-left: 0; }
-  .left .plans, .left .incl, .left .defs { margin-left: 0; }
+  .left .plans, .left .incl { margin-left: 0; }
   .left .incl { text-align: left; }
-  .more a { display: inline-flex; align-items: center; gap: 5px; font-weight: 600; font-size: 15px; text-decoration: none; }
-  .more a:hover { text-decoration: underline; }
   @media (max-width: 980px) {
     .plans { grid-template-columns: 1fr; max-width: 560px; }
     .aud { min-height: 0; }
     .plan { padding: 24px; }
     .status { justify-content: flex-start; }
     .incl { text-align: left; }
+    .limit-groups { grid-template-columns: 1fr; gap: 20px; }
     dl div { grid-template-columns: 1fr; gap: 4px; }
   }
 </style>

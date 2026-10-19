@@ -1,7 +1,9 @@
 /**
  * schema.org structured data. Keep it within the README "Claims": no ratings, reviews or
- * customer counts, and the only offer listed is the Free plan until paid plans are live.
+ * customer counts. Offers come from src/data/plans.mjs: Free, plus Launch and Growth once paid plans are live.
  */
+import { plans, pricing } from "./plans.mjs";
+
 const SITE = "https://onemrr.dev/";
 
 export const organization = {
@@ -30,7 +32,17 @@ export const softwareApplication = {
   description:
     "MRR, ARR and churn analytics across Stripe, the Shopify App Store and the Wix App Market, with Churn Signals, retention emails and cancellation surveys.",
   publisher: { "@id": organization["@id"] },
-  offers: { "@type": "Offer", price: "0", priceCurrency: "USD", description: "Free plan, free forever" },
+  offers: plans
+    .filter((p) => p.price === 0 || pricing.paidPlansLive)
+    .map((p) => ({
+      "@type": "Offer",
+      name: `OneMRR ${p.name}`,
+      price: String(p.price),
+      priceCurrency: pricing.currency,
+      description: p.outcome,
+      url: `${SITE}pricing`,
+      ...(p.price ? { priceSpecification: { "@type": "UnitPriceSpecification", price: String(p.price), priceCurrency: pricing.currency, billingDuration: "P1M", unitText: "MONTH" } } : {}),
+    })),
 };
 
 /** @param {{ q: string, a: string }[]} faqs */
